@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SetaraApp - Audio Assist</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Lexend:wght@300;400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#221f19",
+                        "on-primary-fixed-variant": "#534600",
+                        "on-primary": "#3a3000",
+                        "on-secondary-fixed": "#002115",
+                        "on-secondary": "#003827",
+                        "error-container": "#93000a",
+                        "tertiary": "#ffffff",
+                        "surface-container-high": "#2c2a23",
+                        "surface-container-low": "#1d1b15",
+                        "on-surface-variant": "#cdc6b3",
+                        "inverse-surface": "#e8e2d8",
+                        "secondary-fixed": "#a6f2cf",
+                        "surface-variant": "#37352e",
+                        "on-tertiary-container": "#096f7a",
+                        "primary": "#ffffff",
+                        "on-primary-container": "#746414",
+                        "surface-tint": "#dcc66e",
+                        "tertiary-fixed-dim": "#83d3df",
+                        "primary-fixed-dim": "#dcc66e",
+                        "on-secondary-container": "#87d2b0",
+                        "primary-container": "#f9e287",
+                        "inverse-on-surface": "#333029",
+                        "on-background": "#e8e2d8",
+                        "on-tertiary": "#00363c",
+                        "secondary-container": "#005c42",
+                        "surface-container-lowest": "#100e09",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed": "#9feffb",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed-variant": "#00513a",
+                        "surface": "#15130d",
+                        "on-surface": "#e8e2d8",
+                        "primary-fixed": "#f9e287",
+                        "on-error": "#690005",
+                        "secondary-fixed-dim": "#8bd6b4",
+                        "outline": "#97907f",
+                        "surface-container-highest": "#37352e",
+                        "on-tertiary-fixed-variant": "#004f57",
+                        "surface-bright": "#3c3932",
+                        "tertiary-container": "#9feffb",
+                        "on-tertiary-fixed": "#001f23",
+                        "background": "#15130d",
+                        "inverse-primary": "#6e5e0d",
+                        "on-primary-fixed": "#221b00",
+                        "secondary": "#8bd6b4",
+                        "surface-dim": "#15130d",
+                        "outline-variant": "#4b4738"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "48px",
+                        "stack-md": "24px",
+                        "margin-page": "24px",
+                        "stack-sm": "12px",
+                        "gutter": "16px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-xl": ["Plus Jakarta Sans"],
+                        "body-lg": ["Lexend"],
+                        "label-bold": ["Lexend"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Lexend"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "display-xl": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-bold": ["14px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .wave-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            height: 60px;
+        }
+        .wave-bar {
+            width: 4px;
+            border-radius: 2px;
+            background: #8bd6b4; /* secondary-fixed-dim / sage green */
+        }
+        .wave-bar:nth-child(1) { height: 20px; opacity: 0.4; }
+        .wave-bar:nth-child(2) { height: 40px; opacity: 0.6; }
+        .wave-bar:nth-child(3) { height: 55px; opacity: 0.8; }
+        .wave-bar:nth-child(4) { height: 30px; opacity: 0.5; }
+        .wave-bar:nth-child(5) { height: 45px; opacity: 0.7; }
+        .wave-bar:nth-child(6) { height: 25px; opacity: 0.4; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen font-body-md selection:bg-secondary-container selection:text-on-secondary-container overflow-x-hidden">
+<!-- TopAppBar Shell -->
+<header class="bg-surface fixed top-0 left-0 right-0 z-40 flex justify-between items-center w-full px-margin-page py-stack-sm">
+<div class="flex items-center gap-stack-sm">
+<button class="hover:bg-surface-variant/10 rounded-full transition-colors p-base scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-primary text-headline-md">accessibility_new</span>
+</button>
+<h1 class="font-display-xl text-headline-md text-on-surface tracking-tight">SetaraApp</h1>
+</div>
+<button class="hover:bg-surface-variant/10 rounded-full transition-colors p-base scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-primary text-headline-md">settings</span>
+</button>
+</header>
+<main class="pt-[80px] pb-[120px] px-margin-page max-w-5xl mx-auto flex flex-col gap-stack-lg">
+<!-- Segmented Control -->
+<div class="w-full max-w-md mx-auto bg-surface-container-low p-base rounded-full flex gap-base">
+<button class="flex-1 py-stack-sm px-stack-md rounded-full font-label-bold text-label-bold text-on-surface-variant hover:bg-surface-variant/20 transition-all">
+                Visual
+            </button>
+<button class="flex-1 py-stack-sm px-stack-md rounded-full font-label-bold text-label-bold bg-secondary-container text-on-secondary-container shadow-lg transition-all">
+                Audio Assist
+            </button>
+</div>
+<!-- Animated Wave Visualizer Card -->
+<section class="bg-surface-container-high rounded-3xl p-stack-lg flex flex-col items-center justify-center gap-stack-md border border-outline-variant/30">
+<div class="text-center">
+<p class="font-label-bold text-label-bold text-secondary tracking-widest uppercase mb-base">Listening...</p>
+<div class="wave-container">
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+</div>
+</div>
+<div class="flex items-center gap-stack-sm bg-surface-container-lowest px-stack-md py-base rounded-full">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-body-md text-on-surface-variant">Ambient noise level: Low</span>
+</div>
+</section>
+<!-- Transcription Canvas -->
+<section class="flex flex-col gap-stack-md">
+<div class="flex justify-between items-end">
+<h2 class="font-headline-md text-headline-md text-on-surface">Live Transcription</h2>
+<button class="text-secondary font-label-bold text-label-bold hover:underline">Clear</button>
+</div>
+<div class="bg-surface-container rounded-[24px] p-stack-lg shadow-2xl relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-stack-md opacity-20 group-hover:opacity-40 transition-opacity">
+<span class="material-symbols-outlined text-display-xl">format_quote</span>
+</div>
+<p class="font-headline-lg text-headline-lg text-on-surface leading-relaxed transition-all">
+                    "Halo, saya sedang membantu Anda menerjemahkan suara menjadi teks secara <span class="text-secondary-fixed">real-time.</span>"
+                </p>
+<div class="mt-stack-lg pt-stack-md border-t border-outline-variant/20 flex flex-wrap gap-stack-sm">
+<button class="flex items-center gap-base bg-surface-variant/40 hover:bg-surface-variant/60 px-stack-md py-stack-sm rounded-xl transition-all">
+<span class="material-symbols-outlined text-[20px]">content_copy</span>
+<span class="font-label-bold text-label-bold">Copy</span>
+</button>
+<button class="flex items-center gap-base bg-surface-variant/40 hover:bg-surface-variant/60 px-stack-md py-stack-sm rounded-xl transition-all">
+<span class="material-symbols-outlined text-[20px]">translate</span>
+<span class="font-label-bold text-label-bold">Translate</span>
+</button>
+<button class="flex items-center gap-base bg-surface-variant/40 hover:bg-surface-variant/60 px-stack-md py-stack-sm rounded-xl transition-all">
+<span class="material-symbols-outlined text-[20px]">share</span>
+<span class="font-label-bold text-label-bold">Share</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Contextual Help Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+<div class="bg-surface-container-low p-stack-md rounded-[24px] flex items-center gap-stack-md hover:bg-surface-container transition-colors cursor-pointer border border-transparent hover:border-outline-variant/30">
+<div class="w-12 h-12 rounded-full bg-tertiary-container/10 flex items-center justify-center text-tertiary-fixed-dim">
+<span class="material-symbols-outlined">history_edu</span>
+</div>
+<div>
+<h3 class="font-label-bold text-label-bold text-on-surface">Save Transcript</h3>
+<p class="text-on-surface-variant text-body-md opacity-70">Log this session to history</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-stack-md rounded-[24px] flex items-center gap-stack-md hover:bg-surface-container transition-colors cursor-pointer border border-transparent hover:border-outline-variant/30">
+<div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">keyboard</span>
+</div>
+<div>
+<h3 class="font-label-bold text-label-bold text-on-surface">Type Instead</h3>
+<p class="text-on-surface-variant text-body-md opacity-70">Switch to manual input</p>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar Shell -->
+<nav class="fixed bottom-6 left-6 right-6 z-50 flex justify-around items-center py-base px-gutter bg-surface-container-high rounded-xl shadow-2xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-base hover:bg-surface-variant/20 rounded-xl transition-all Active: scale-95 opacity-90 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-bold text-label-bold">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-base py-base transition-all scale-105 shadow-lg" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">hearing</span>
+<span class="font-label-bold text-label-bold">Assist</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-base hover:bg-surface-variant/20 rounded-xl transition-all Active: scale-95 opacity-90 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-bold text-label-bold">History</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-base hover:bg-surface-variant/20 rounded-xl transition-all Active: scale-95 opacity-90 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">menu</span>
+<span class="font-label-bold text-label-bold">Menu</span>
+</a>
+</nav>
+</body></html>
