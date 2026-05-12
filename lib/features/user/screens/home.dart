@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'audio_assist.dart';
 import 'scanner.dart';
-import 'shared/navigation/assist_page_transition.dart';
-import 'shared/widgets/assist_toggle.dart';
-import 'shared/widgets/setara_bottom_nav_bar.dart';
-import 'shared/widgets/setara_sliver_app_bar.dart';
+import '../../../shared/navigation/assist_page_transition.dart';
+import '../../../shared/widgets/assist_toggle.dart';
+import '../../../shared/widgets/setara_bottom_nav_bar.dart';
+import '../../../shared/widgets/setara_sliver_app_bar.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -83,7 +83,7 @@ class _HomepageState extends State<Homepage> {
                       ),
                     ],
                   ),
-                  // Menggunakan Material transparan agar efek klik (InkWell) bisa menyatu dengan border-radius
+
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
@@ -95,15 +95,14 @@ class _HomepageState extends State<Homepage> {
                             builder: (context) => const ScannerPage(),
                           ),
                         );
-                        // Aksi ketika card ditekan
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment:
-                              CrossAxisAlignment.start, // Rata kiri
+                              CrossAxisAlignment.start, 
                           mainAxisAlignment: MainAxisAlignment
-                              .spaceBetween, // Dorong atas-bawah
+                              .spaceBetween, 
                           children: [
                             // 1. Kotak Icon
                             Container(
@@ -288,7 +287,6 @@ class _HomepageState extends State<Homepage> {
                             builder: (context) => const ScannerPage(),
                           ),
                         );
-                        // Aksi ketika card ditekan
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -300,7 +298,7 @@ class _HomepageState extends State<Homepage> {
                               height: 64,
                               width: 64,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFFFFFF), // primary
+                                color: const Color(0xFFFFFFFF),
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: const Center(

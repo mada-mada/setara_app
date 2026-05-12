@@ -3,9 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:camera/camera.dart';
 import 'audio_assist.dart';
 import 'home.dart';
-import 'shared/navigation/assist_page_transition.dart';
-import 'shared/widgets/setara_bottom_nav_bar.dart';
-import 'shared/widgets/setara_sliver_app_bar.dart';
+import '../../../shared/navigation/assist_page_transition.dart';
+import '../../../shared/widgets/setara_bottom_nav_bar.dart';
+import '../../../shared/widgets/setara_sliver_app_bar.dart';
 
 class ScannerPage extends StatefulWidget {
   const ScannerPage({super.key});

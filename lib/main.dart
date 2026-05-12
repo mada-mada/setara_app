@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:setara_app/home.dart';
+import 'package:setara_app/features/user/screens/home.dart';
 
 void main() {
   runApp(const Main());
