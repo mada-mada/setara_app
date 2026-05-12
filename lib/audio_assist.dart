@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'home.dart';
+import 'shared/navigation/assist_page_transition.dart';
+import 'shared/widgets/assist_toggle.dart';
+import 'shared/widgets/setara_bottom_nav_bar.dart';
+import 'shared/widgets/setara_sliver_app_bar.dart';
 
 class AudioAssistPage extends StatefulWidget {
   const AudioAssistPage({super.key});
@@ -18,151 +22,29 @@ class _AudioAssistPageState extends State<AudioAssistPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF15130D),
       extendBody: true,
-      bottomNavigationBar: _buildFloatingNavBar(context),
+      bottomNavigationBar: SetaraBottomNavBar(
+        currentIndex: _currentIndex,
+        backgroundColor: const Color(0xFF2C2A23),
+        onTap: _handleBottomNavTap,
+      ),
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            backgroundColor: const Color(0xFF15130D),
-            floating: true,
-            snap: true,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            pinned: false,
-            leadingWidth: 72,
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 24.0, top: 8, bottom: 8),
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.transparent,
-                ),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.accessibility_new,
-                    color: Color(0xFFFFFFFF),
-                  ),
-                  onPressed: () {},
-                ),
-              ),
-            ),
-            title: Text(
-              "SetaraApp",
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                color: const Color(0xFFE8E2D8),
-                letterSpacing: -0.5,
-              ),
-            ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 24.0),
-                child: IconButton(
-                  icon: const Icon(Icons.settings, color: Color(0xFFFFFFFF)),
-                  onPressed: () {},
-                ),
-              ),
-            ],
-          ),
+          const SetaraSliverAppBar(),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
           // Toggle Button
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Container(
-                height: 56,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1D1B15),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Stack(
-                    children: [
-                      AnimatedAlign(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOutCubic,
-                        alignment: isAudioAssistActive
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        child: FractionallySizedBox(
-                          widthFactor: 0.5,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: const Color(
-                                0xFF005C42,
-                              ), // secondary-container
-                              borderRadius: BorderRadius.circular(999),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.2),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  PageRouteBuilder(
-                                    pageBuilder:
-                                        (context, animation1, animation2) =>
-                                            const Homepage(),
-                                    transitionDuration: Duration.zero,
-                                    reverseTransitionDuration: Duration.zero,
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                color: Colors.transparent,
-                                alignment: Alignment.center,
-                                child: Text(
-                                  "Visual",
-                                  style: GoogleFonts.lexend(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: !isAudioAssistActive
-                                        ? const Color(0xFF87D2B0)
-                                        : const Color(0xFFCDC6B3),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                // Sudah di Audio Assist
-                              },
-                              child: Container(
-                                color: Colors.transparent,
-                                alignment: Alignment.center,
-                                child: Text(
-                                  "Audio Assist",
-                                  style: GoogleFonts.lexend(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: isAudioAssistActive
-                                        ? const Color(0xFF87D2B0)
-                                        : const Color(0xFFCDC6B3),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+              child: AssistToggle(
+                isAudioAssistActive: isAudioAssistActive,
+                onSelectVisual: () {
+                  Navigator.pushReplacement(
+                    context,
+                    buildAssistPageRoute(const Homepage()),
+                  );
+                },
+                onSelectAudio: () {},
               ),
             ),
           ),
@@ -486,108 +368,17 @@ class _AudioAssistPageState extends State<AudioAssistPage> {
     );
   }
 
-  Widget _buildFloatingNavBar(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
-        child: Container(
-          height: 72,
-          decoration: BoxDecoration(
-            color: const Color(0xFF2C2A23), // surface-container-high
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                blurRadius: 30,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(context, icon: Icons.home, label: "Home", index: 0),
-              _buildNavItem(
-                context,
-                icon: Icons.hearing,
-                label: "Assist",
-                index: 1,
-              ),
-              _buildNavItem(
-                context,
-                icon: Icons.history,
-                label: "History",
-                index: 2,
-              ),
-              _buildNavItem(context, icon: Icons.menu, label: "Menu", index: 3),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  void _handleBottomNavTap(int index) {
+    if (index == 0) {
+      Navigator.pushReplacement(
+        context,
+        buildAssistPageRoute(const Homepage()),
+      );
+      return;
+    }
 
-  Widget _buildNavItem(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required int index,
-  }) {
-    bool isActive = _currentIndex == index;
-
-    return GestureDetector(
-      onTap: () {
-        if (index == 0) {
-          // Ke Home Page
-          Navigator.pushReplacement(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation1, animation2) =>
-                  const Homepage(),
-              transitionDuration: Duration.zero,
-              reverseTransitionDuration: Duration.zero,
-            ),
-          );
-        } else {
-          setState(() {
-            _currentIndex = index;
-          });
-        }
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive
-              ? const Color(0xFFF9E287)
-              : Colors.transparent, // primary-container
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isActive
-                  ? const Color(0xFF746414)
-                  : const Color(0xFFCDC6B3),
-              size: 24,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: GoogleFonts.lexend(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: isActive
-                    ? const Color(0xFF746414)
-                    : const Color(0xFFCDC6B3),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    setState(() {
+      _currentIndex = index;
+    });
   }
 }

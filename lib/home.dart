@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'audio_assist.dart';
+import 'shared/navigation/assist_page_transition.dart';
+import 'shared/widgets/assist_toggle.dart';
+import 'shared/widgets/setara_bottom_nav_bar.dart';
+import 'shared/widgets/setara_sliver_app_bar.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -10,7 +14,7 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  bool isAudioAssistActive = false;
+  final bool isAudioAssistActive = false;
   int _currentIndex = 0;
 
   @override
@@ -18,138 +22,25 @@ class _HomepageState extends State<Homepage> {
     return Scaffold(
       backgroundColor: const Color(0xFF15130D),
       extendBody: true,
-      bottomNavigationBar: _buildFloatingNavBar(),
+      bottomNavigationBar: SetaraBottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: _handleBottomNavTap,
+      ),
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            backgroundColor: const Color(0xFF15130D),
-            floating: true,
-            snap: true,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            pinned: false,
-            title: const Row(
-              children: [
-                Icon(
-                  Icons.accessibility_new,
-                  color: Color(0xFFFDE68A),
-                  size: 24,
-                ),
-                Text(
-                  "SetaraApp",
-                  style: TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFFe8e2d8),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          const SetaraSliverAppBar(),
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
           SliverToBoxAdapter(
-            child: Container(
-              height: 72,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1D1B15),
-                borderRadius: BorderRadius.circular(999),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 10,
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Stack(
-                  children: [
-                    AnimatedAlign(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOutCubic,
-                      alignment: isAudioAssistActive
-                          ? Alignment.centerLeft
-                          : Alignment.centerRight,
-                      child: FractionallySizedBox(
-                        widthFactor: 0.5,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF9E287),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        // Tombol Kiri (Audio Assist)
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.pushReplacement(
-                                context,
-                                PageRouteBuilder(
-                                  pageBuilder:
-                                      (context, animation1, animation2) =>
-                                          const AudioAssistPage(),
-                                  transitionDuration: Duration.zero,
-                                  reverseTransitionDuration: Duration.zero,
-                                ),
-                              );
-                            },
-                            // Container transparan agar seluruh area bisa diklik
-                            child: Container(
-                              color: Colors.transparent,
-                              alignment: Alignment.center,
-                              child: Text(
-                                "Audio Assist",
-                                style: GoogleFonts.lexend(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  // Warna berubah otomatis berdasarkan status
-                                  color: isAudioAssistActive
-                                      ? const Color(
-                                          0xFF746414,
-                                        ) // on-primary-container
-                                      : const Color(0xFFCDC6B3).withValues(
-                                          alpha: 0.6,
-                                        ), // on-surface-variant
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // Tombol Kanan (Visual Assist)
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              // Sudah di Visual Assist
-                            },
-                            child: Container(
-                              color: Colors.transparent,
-                              alignment: Alignment.center,
-                              child: Text(
-                                "Visual Assist",
-                                style: GoogleFonts.lexend(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: !isAudioAssistActive
-                                      ? const Color(0xFF746414)
-                                      : const Color(
-                                          0xFFCDC6B3,
-                                        ).withValues(alpha: 0.6),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+            child: AssistToggle(
+              isAudioAssistActive: isAudioAssistActive,
+              onSelectVisual: () {},
+              onSelectAudio: () {
+                Navigator.pushReplacement(
+                  context,
+                  buildAssistPageRoute(const AudioAssistPage()),
+                );
+              },
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
@@ -426,97 +317,17 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  Widget _buildFloatingNavBar() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
-        child: Container(
-          height: 72,
-          decoration: BoxDecoration(
-            color: const Color(0xFF221F19), // surface-container dari desain
-            borderRadius: BorderRadius.circular(24), // Melengkung halus
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(
-                  alpha: 0.3,
-                ), // Penyesuaian ke withValues
-                blurRadius: 30,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(icon: Icons.home, label: "Home", index: 0),
-              _buildNavItem(icon: Icons.hearing, label: "Assist", index: 1),
-              _buildNavItem(icon: Icons.history, label: "History", index: 2),
-              _buildNavItem(icon: Icons.menu, label: "Menu", index: 3),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  void _handleBottomNavTap(int index) {
+    if (index == 1) {
+      Navigator.pushReplacement(
+        context,
+        buildAssistPageRoute(const AudioAssistPage()),
+      );
+      return;
+    }
 
-  Widget _buildNavItem({
-    required IconData icon,
-    required String label,
-    required int index,
-  }) {
-    bool isActive = _currentIndex == index;
-
-    return GestureDetector(
-      onTap: () {
-        if (index == 1) {
-          // Navigasi ke Audio Assist
-          Navigator.pushReplacement(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation1, animation2) =>
-                  const AudioAssistPage(),
-              transitionDuration: Duration.zero,
-              reverseTransitionDuration: Duration.zero,
-            ),
-          );
-        } else {
-          setState(() {
-            _currentIndex = index;
-          });
-        }
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFF9E287) : Colors.transparent,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isActive
-                  ? const Color(0xFF746414)
-                  : const Color(0xFFCDC6B3),
-              size: 24,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: GoogleFonts.lexend(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: isActive
-                    ? const Color(0xFF746414)
-                    : const Color(0xFFCDC6B3),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    setState(() {
+      _currentIndex = index;
+    });
   }
 }
