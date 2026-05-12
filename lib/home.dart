@@ -89,6 +89,12 @@ class _HomepageState extends State<Homepage> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(24),
                       onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ScannerPage(),
+                          ),
+                        );
                         // Aksi ketika card ditekan
                       },
                       child: Padding(
@@ -210,6 +216,12 @@ class _HomepageState extends State<Homepage> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(24),
                       onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ScannerPage(),
+                          ),
+                        );
                         // Aksi ketika card ditekan
                       },
                       child: Padding(
@@ -270,6 +282,12 @@ class _HomepageState extends State<Homepage> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(24),
                       onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ScannerPage(),
+                          ),
+                        );
                         // Aksi ketika card ditekan
                       },
                       child: Padding(
