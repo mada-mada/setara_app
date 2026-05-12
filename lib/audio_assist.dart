@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'home.dart';
+import 'scanner.dart';
 import 'shared/navigation/assist_page_transition.dart';
 import 'shared/widgets/assist_toggle.dart';
 import 'shared/widgets/setara_bottom_nav_bar.dart';
@@ -373,6 +374,12 @@ class _AudioAssistPageState extends State<AudioAssistPage> {
       Navigator.pushReplacement(
         context,
         buildAssistPageRoute(const Homepage()),
+      );
+      return;
+    } else if (index == 2) {
+      Navigator.pushReplacement(
+        context,
+        buildAssistPageRoute(const ScannerPage()),
       );
       return;
     }

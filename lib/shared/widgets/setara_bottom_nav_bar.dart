@@ -16,7 +16,7 @@ class SetaraBottomNavBar extends StatelessWidget {
   static const List<_SetaraNavItem> _items = [
     _SetaraNavItem(icon: Icons.home, label: 'Home'),
     _SetaraNavItem(icon: Icons.hearing, label: 'Assist'),
-    _SetaraNavItem(icon: Icons.history, label: 'History'),
+    _SetaraNavItem(icon: Icons.camera_enhance, label: 'Scanner'),
     _SetaraNavItem(icon: Icons.menu, label: 'Menu'),
   ];
 
