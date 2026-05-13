@@ -7,7 +7,7 @@ import '../../../shared/widgets/setara_bottom_nav_bar.dart';
 import 'home.dart';
 import 'audio_assist.dart';
 import 'scanner.dart';
-// import 'menu.dart'; // Buat atau sesuaikan halaman menu nanti
+import 'menu.dart';
 
 class MainWrapper extends StatelessWidget {
   const MainWrapper({super.key});
@@ -21,9 +21,7 @@ class MainWrapper extends StatelessWidget {
       const Homepage(),
       const AudioAssistPage(),
       const ScannerPage(),
-      const Center(
-        child: Text("Halaman Menu", style: TextStyle(color: Colors.white)),
-      ), // Dummy
+      const MenuPage(),
     ];
 
     return Scaffold(
