@@ -99,10 +99,8 @@ class _HomepageState extends State<Homepage> {
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start, 
-                          mainAxisAlignment: MainAxisAlignment
-                              .spaceBetween, 
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             // 1. Kotak Icon
                             Container(
