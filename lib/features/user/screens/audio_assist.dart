@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'home.dart';
-import 'scanner.dart';
-import '../../../shared/navigation/assist_page_transition.dart';
+import 'package:provider/provider.dart';
+import '../../../shared/providers/bottom_navbar_provider.dart';
 import '../../../shared/widgets/assist_toggle.dart';
-import '../../../shared/widgets/setara_bottom_nav_bar.dart';
 import '../../../shared/widgets/setara_sliver_app_bar.dart';
 
 class AudioAssistPage extends StatefulWidget {
@@ -15,19 +13,12 @@ class AudioAssistPage extends StatefulWidget {
 }
 
 class _AudioAssistPageState extends State<AudioAssistPage> {
-  int _currentIndex = 1; // Index 1 untuk Assist
   bool isAudioAssistActive = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF15130D),
-      extendBody: true,
-      bottomNavigationBar: SetaraBottomNavBar(
-        currentIndex: _currentIndex,
-        backgroundColor: const Color(0xFF2C2A23),
-        onTap: _handleBottomNavTap,
-      ),
       body: CustomScrollView(
         slivers: [
           const SetaraSliverAppBar(),
@@ -40,10 +31,8 @@ class _AudioAssistPageState extends State<AudioAssistPage> {
               child: AssistToggle(
                 isAudioAssistActive: isAudioAssistActive,
                 onSelectVisual: () {
-                  Navigator.pushReplacement(
-                    context,
-                    buildAssistPageRoute(const Homepage()),
-                  );
+                  // Pindah ke tab Home (index 0) via provider
+                  context.read<BottomNavProvider>().setIndex(0);
                 },
                 onSelectAudio: () {},
               ),
@@ -367,25 +356,5 @@ class _AudioAssistPageState extends State<AudioAssistPage> {
         ],
       ),
     );
-  }
-
-  void _handleBottomNavTap(int index) {
-    if (index == 0) {
-      Navigator.pushReplacement(
-        context,
-        buildAssistPageRoute(const Homepage()),
-      );
-      return;
-    } else if (index == 2) {
-      Navigator.pushReplacement(
-        context,
-        buildAssistPageRoute(const ScannerPage()),
-      );
-      return;
-    }
-
-    setState(() {
-      _currentIndex = index;
-    });
   }
 }

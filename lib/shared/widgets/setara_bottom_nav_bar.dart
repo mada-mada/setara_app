@@ -17,7 +17,7 @@ class SetaraBottomNavBar extends StatelessWidget {
     _SetaraNavItem(icon: Icons.home, label: 'Home'),
     _SetaraNavItem(icon: Icons.hearing, label: 'Assist'),
     _SetaraNavItem(icon: Icons.camera_enhance, label: 'Scanner'),
-    _SetaraNavItem(icon: Icons.menu, label: 'Menu'),
+    _SetaraNavItem(icon: Icons.restaurant_menu, label: 'Menu'),
   ];
 
   @override

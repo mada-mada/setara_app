@@ -1,32 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'audio_assist.dart';
+import 'package:provider/provider.dart';
 import 'scanner.dart';
-import '../../../shared/navigation/assist_page_transition.dart';
+import '../../../shared/providers/bottom_navbar_provider.dart';
 import '../../../shared/widgets/assist_toggle.dart';
-import '../../../shared/widgets/setara_bottom_nav_bar.dart';
 import '../../../shared/widgets/setara_sliver_app_bar.dart';
 
-class Homepage extends StatefulWidget {
+class Homepage extends StatelessWidget {
   const Homepage({super.key});
-
-  @override
-  State<Homepage> createState() => _HomepageState();
-}
-
-class _HomepageState extends State<Homepage> {
-  final bool isAudioAssistActive = false;
-  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF15130D),
-      extendBody: true,
-      bottomNavigationBar: SetaraBottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _handleBottomNavTap,
-      ),
       body: CustomScrollView(
         slivers: [
           const SetaraSliverAppBar(),
@@ -34,13 +20,11 @@ class _HomepageState extends State<Homepage> {
 
           SliverToBoxAdapter(
             child: AssistToggle(
-              isAudioAssistActive: isAudioAssistActive,
+              isAudioAssistActive: false,
               onSelectVisual: () {},
               onSelectAudio: () {
-                Navigator.pushReplacement(
-                  context,
-                  buildAssistPageRoute(const AudioAssistPage()),
-                );
+                // Pindah ke tab Assist (index 1) via provider
+                context.read<BottomNavProvider>().setIndex(1);
               },
             ),
           ),
@@ -89,12 +73,8 @@ class _HomepageState extends State<Homepage> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(24),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ScannerPage(),
-                          ),
-                        );
+                        // Pindah ke tab Scanner (index 2) via provider
+                        context.read<BottomNavProvider>().setIndex(2);
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -213,13 +193,8 @@ class _HomepageState extends State<Homepage> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(24),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ScannerPage(),
-                          ),
-                        );
-                        // Aksi ketika card ditekan
+                        // Pindah ke tab Scanner (index 2) via provider
+                        context.read<BottomNavProvider>().setIndex(2);
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -279,12 +254,8 @@ class _HomepageState extends State<Homepage> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(24),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ScannerPage(),
-                          ),
-                        );
+                        // Pindah ke tab Scanner (index 2) via provider
+                        context.read<BottomNavProvider>().setIndex(2);
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -327,28 +298,9 @@ class _HomepageState extends State<Homepage> {
               ]),
             ),
           ),
+          const SliverToBoxAdapter(child: SizedBox(height: 120)),
         ],
       ),
     );
-  }
-
-  void _handleBottomNavTap(int index) {
-    if (index == 1) {
-      Navigator.pushReplacement(
-        context,
-        buildAssistPageRoute(const AudioAssistPage()),
-      );
-      return;
-    } else if (index == 2) {
-      Navigator.pushReplacement(
-        context,
-        buildAssistPageRoute(const ScannerPage()),
-      );
-      return;
-    }
-
-    setState(() {
-      _currentIndex = index;
-    });
   }
 }

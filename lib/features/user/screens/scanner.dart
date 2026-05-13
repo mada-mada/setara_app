@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:camera/camera.dart';
-import 'audio_assist.dart';
-import 'home.dart';
-import '../../../shared/navigation/assist_page_transition.dart';
-import '../../../shared/widgets/setara_bottom_nav_bar.dart';
 import '../../../shared/widgets/setara_sliver_app_bar.dart';
 
 class ScannerPage extends StatefulWidget {
@@ -15,8 +11,6 @@ class ScannerPage extends StatefulWidget {
 }
 
 class _ScannerPageState extends State<ScannerPage> {
-  int _currentIndex = 2;
-
   // Variabel untuk kamera
   late CameraController _controller;
   bool _isCameraInitialized = false;
@@ -77,11 +71,6 @@ class _ScannerPageState extends State<ScannerPage> {
     }
     return Scaffold(
       backgroundColor: const Color(0xFF15130D),
-      extendBody: true,
-      bottomNavigationBar: SetaraBottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _handleBottomNavTap,
-      ),
       body: CustomScrollView(
         slivers: [
           const SetaraSliverAppBar(),
@@ -123,30 +112,9 @@ class _ScannerPageState extends State<ScannerPage> {
               ),
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          const SliverToBoxAdapter(child: SizedBox(height: 120)),
         ],
       ),
     );
-  }
-
-  void _handleBottomNavTap(int index) {
-    if (index == 2) return; // Sudah di ScannerPage
-    if (index == 1) {
-      Navigator.pushReplacement(
-        context,
-        buildAssistPageRoute(const AudioAssistPage()),
-      );
-      return;
-    }
-    if (index == 0) {
-      Navigator.pushReplacement(
-        context,
-        buildAssistPageRoute(const Homepage()),
-      );
-      return;
-    }
-    setState(() {
-      _currentIndex = index;
-    });
   }
 }
