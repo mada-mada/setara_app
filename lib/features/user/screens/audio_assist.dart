@@ -35,8 +35,8 @@ class _AudioAssistPageState extends State<AudioAssistPage>
   bool _isTranslating = false;
   String _targetLangCode = 'en';
   String _targetLangName = 'English';
-  String _sourceLangCode = 'id';
-  String _sourceLangName = 'Indonesian';
+  final String _sourceLangCode = 'id';
+  final String _sourceLangName = 'Indonesian';
 
   final Map<String, String> _languages = {
     'en': 'English',
