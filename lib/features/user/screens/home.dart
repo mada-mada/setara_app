@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'scanner.dart';
 import '../../../shared/providers/bottom_navbar_provider.dart';
 import '../../../shared/widgets/assist_toggle.dart';
 import '../../../shared/widgets/setara_sliver_app_bar.dart';

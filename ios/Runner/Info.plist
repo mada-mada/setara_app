@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Aplikasi ini butuh akses mikrofon untuk mengubah suara menjadi teks.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Aplikasi ini butuh akses pengenalan suara untuk fitur transkripsi langsung.</string>
 </dict>
 </plist>

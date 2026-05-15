@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:translator/translator.dart';
+import 'dart:math' as math;
+import 'dart:async';
+
 import '../../../shared/providers/bottom_navbar_provider.dart';
 import '../../../shared/widgets/assist_toggle.dart';
 import '../../../shared/widgets/setara_sliver_app_bar.dart';
@@ -12,8 +18,198 @@ class AudioAssistPage extends StatefulWidget {
   State<AudioAssistPage> createState() => _AudioAssistPageState();
 }
 
-class _AudioAssistPageState extends State<AudioAssistPage> {
-  bool isAudioAssistActive = true;
+class _AudioAssistPageState extends State<AudioAssistPage>
+    with TickerProviderStateMixin {
+  // Variabel Speech to Text
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  bool _isMicEnabled = false;
+  String _currentWords = "Tekan tombol mic untuk mulai...";
+  String _previousText = "";
+
+  // Variabel Animasi Wave
+  late AnimationController _waveController;
+
+  // Variabel Terjemahan Dinamis
+  final _translator = GoogleTranslator();
+  bool _isTranslating = false;
+  String _targetLangCode = 'en';
+  String _targetLangName = 'English';
+  final String _sourceLangCode = 'id';
+  final String _sourceLangName = 'Indonesian';
+
+  final Map<String, String> _languages = {
+    'en': 'English',
+    'ja': 'Japanese',
+    'ko': 'Korean',
+    'ar': 'Arabic',
+    'id': 'Indonesian',
+    'de': 'German',
+    'es': 'Spanish',
+    'fr': 'French',
+    'it': 'Italian',
+    'pt': 'Portuguese',
+    'ru': 'Russian',
+    'zh-cn': 'Chinese (Simplified)',
+  };
+
+  // Variabel Timer untuk Auto-Clear
+  Timer? _clearTextTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+    _waveController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _waveController.dispose();
+    _clearTextTimer?.cancel();
+    _speech.cancel();
+    super.dispose();
+  }
+
+  // --- Fungsi Saklar Mic ---
+  void _toggleMic() {
+    setState(() {
+      _isMicEnabled = !_isMicEnabled;
+    });
+
+    if (_isMicEnabled) {
+      _currentWords = "Mendengarkan...";
+      _checkPermissionsAndListen();
+    } else {
+      _speech.stop();
+      _clearTextTimer?.cancel();
+      setState(() {
+        _isListening = false;
+        _currentWords = "Mic dijeda. Tekan tombol untuk lanjut.";
+      });
+    }
+  }
+
+  Future<void> _checkPermissionsAndListen() async {
+    var status = await Permission.microphone.status;
+    if (!status.isGranted) {
+      await Permission.microphone.request();
+    }
+    _listen();
+  }
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (status) {
+          if ((status == 'done' || status == 'notListening') && _isMicEnabled) {
+            _startListening();
+          }
+        },
+      );
+
+      if (available) {
+        setState(() => _isListening = true);
+        _startListening();
+      }
+    } else {
+      setState(() {
+        _isListening = false;
+        _speech.stop();
+      });
+    }
+  }
+
+  void _startListening() {
+    if (!mounted || !_isMicEnabled) return;
+    _speech.listen(
+      localeId: _sourceLangCode,
+      onResult: (val) {
+        setState(() {
+          _currentWords = val.recognizedWords;
+
+          if (val.hasConfidenceRating && val.confidence > 0) {
+            _previousText += "$_currentWords ";
+            _currentWords = "";
+          }
+        });
+
+        // Logika Auto-Clear Teks setelah 8 detik tanpa input baru
+        _clearTextTimer?.cancel();
+        _clearTextTimer = Timer(const Duration(seconds: 8), () {
+          if (mounted) {
+            setState(() {
+              _previousText = "";
+              _currentWords = "";
+            });
+          }
+        });
+      },
+      pauseFor: const Duration(seconds: 5),
+    );
+  }
+
+  // --- Fungsi Translate Dinamis ---
+  Future<void> _translateText() async {
+    if (_previousText.trim().isEmpty) return;
+    setState(() => _isTranslating = true);
+
+    try {
+      var translation = await _translator.translate(
+        _previousText,
+        from: 'auto', // Auto-deteksi bahasa sumber
+        to: _targetLangCode,
+      );
+
+      if (mounted) _showTranslationResult(translation.text);
+    } catch (e) {
+      debugPrint("Translate Error: $e");
+    } finally {
+      if (mounted) setState(() => _isTranslating = false);
+    }
+  }
+
+  void _showTranslationResult(String text) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF221F19),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Translated to $_targetLangName",
+                style: GoogleFonts.lexend(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF8BD6B4),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                text,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFFE8E2D8),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,23 +225,29 @@ class _AudioAssistPageState extends State<AudioAssistPage> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: AssistToggle(
-                isAudioAssistActive: isAudioAssistActive,
+                isAudioAssistActive: true,
                 onSelectVisual: () {
-                  // Pindah ke tab Home (index 0) via provider
+                  // Bersihkan state mic sebelum pindah halaman
+                  _isMicEnabled = false;
+                  _isListening = false;
+                  _speech.stop();
+                  _clearTextTimer?.cancel();
                   context.read<BottomNavProvider>().setIndex(0);
                 },
-                onSelectAudio: () {},
+                onSelectAudio: () {
+                  // Sudah di halaman Audio Assist, tidak perlu aksi
+                },
               ),
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
-          // Animated Wave Visualizer Card
+          // Animated Wave Visualizer Card (Statis Tingginya)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Container(
-                padding: const EdgeInsets.all(48),
+                padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
                   color: const Color(0xFF2C2A23), // surface-container-high
                   borderRadius: BorderRadius.circular(24),
@@ -57,59 +259,90 @@ class _AudioAssistPageState extends State<AudioAssistPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "LISTENING...",
+                      _isListening ? "LISTENING..." : "PAUSED",
                       style: GoogleFonts.lexend(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 2,
-                        color: const Color(0xFF8BD6B4), // secondary
+                        color: _isListening
+                            ? const Color(0xFF8BD6B4)
+                            : Colors.grey,
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        _buildWaveBar(height: 20, opacity: 0.4),
-                        _buildWaveBar(height: 40, opacity: 0.6),
-                        _buildWaveBar(height: 55, opacity: 0.8),
-                        _buildWaveBar(height: 30, opacity: 0.5),
-                        _buildWaveBar(height: 45, opacity: 0.7),
-                        _buildWaveBar(height: 25, opacity: 0.4),
-                      ],
                     ),
                     const SizedBox(height: 24),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(
-                          0xFF100E09,
-                        ), // surface-container-lowest
-                        borderRadius: BorderRadius.circular(999),
-                      ),
+
+                    // Wave Bar diletakkan di dalam SizedBox agar kartu tidak bergoyang
+                    SizedBox(
+                      height: 80,
                       child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF8BD6B4),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            "Ambient noise level: Low",
-                            style: GoogleFonts.lexend(
-                              fontSize: 16,
-                              color: const Color(0xFFCDC6B3),
-                            ),
-                          ),
+                          _buildWaveBar(height: 20, opacity: 0.4, index: 0),
+                          _buildWaveBar(height: 40, opacity: 0.6, index: 1),
+                          _buildWaveBar(height: 55, opacity: 0.8, index: 2),
+                          _buildWaveBar(height: 30, opacity: 0.5, index: 3),
+                          _buildWaveBar(height: 45, opacity: 0.7, index: 4),
+                          _buildWaveBar(height: 25, opacity: 0.4, index: 5),
                         ],
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Mic Toggle Button
+                    InkWell(
+                      onTap: _toggleMic,
+                      borderRadius: BorderRadius.circular(999),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _isMicEnabled
+                              ? const Color(0xFF100E09)
+                              : const Color(0xFF1D1B15),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: _isMicEnabled
+                                ? const Color(0xFF8BD6B4)
+                                : Colors.redAccent.withValues(alpha: 0.5),
+                            width: 1.5,
+                          ),
+                          boxShadow: _isMicEnabled
+                              ? [
+                                  BoxShadow(
+                                    color: const Color(
+                                      0xFF8BD6B4,
+                                    ).withValues(alpha: 0.1),
+                                    blurRadius: 10,
+                                    spreadRadius: 2,
+                                  ),
+                                ]
+                              : [],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _isMicEnabled ? Icons.mic : Icons.mic_off,
+                              color: _isMicEnabled
+                                  ? const Color(0xFF8BD6B4)
+                                  : Colors.redAccent,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              _isMicEnabled ? "Mic Aktif" : "Mulai Merekam",
+                              style: GoogleFonts.lexend(
+                                fontSize: 14,
+                                color: _isMicEnabled
+                                    ? const Color(0xFFCDC6B3)
+                                    : Colors.white70,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -138,12 +371,20 @@ class _AudioAssistPageState extends State<AudioAssistPage> {
                           color: const Color(0xFFE8E2D8),
                         ),
                       ),
-                      Text(
-                        "Clear",
-                        style: GoogleFonts.lexend(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF8BD6B4),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _previousText = "";
+                            _currentWords = "";
+                          });
+                        },
+                        child: Text(
+                          "Clear",
+                          style: GoogleFonts.lexend(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF8BD6B4),
+                          ),
                         ),
                       ),
                     ],
@@ -185,18 +426,14 @@ class _AudioAssistPageState extends State<AudioAssistPage> {
                               letterSpacing: -0.5,
                               color: const Color(0xFFE8E2D8),
                             ),
-                            children: const [
+                            children: [
+                              TextSpan(text: _previousText),
                               TextSpan(
-                                text:
-                                    "\"Halo, saya sedang membantu Anda menerjemahkan suara menjadi teks secara ",
-                              ),
-                              TextSpan(
-                                text: "real-time.",
-                                style: TextStyle(
+                                text: _currentWords,
+                                style: const TextStyle(
                                   color: Color(0xFFA6F2CF),
-                                ), // secondary-fixed
+                                ),
                               ),
-                              TextSpan(text: "\""),
                             ],
                           ),
                         ),
@@ -218,7 +455,32 @@ class _AudioAssistPageState extends State<AudioAssistPage> {
                             runSpacing: 12,
                             children: [
                               _buildActionBtn(Icons.content_copy, "Copy"),
-                              _buildActionBtn(Icons.translate, "Translate"),
+
+                              // PopupMenuButton Translate
+                              PopupMenuButton<String>(
+                                onSelected: (String code) {
+                                  setState(() {
+                                    _targetLangCode = code;
+                                    _targetLangName = _languages[code]!;
+                                  });
+                                  _translateText();
+                                },
+                                itemBuilder: (context) => _languages.entries
+                                    .map(
+                                      (e) => PopupMenuItem(
+                                        value: e.key,
+                                        child: Text(e.value),
+                                      ),
+                                    )
+                                    .toList(),
+                                child: _buildActionBtn(
+                                  Icons.translate,
+                                  _isTranslating
+                                      ? "Wait..."
+                                      : "To $_targetLangName",
+                                ),
+                              ),
+
                               _buildActionBtn(Icons.share, "Share"),
                             ],
                           ),
@@ -232,7 +494,7 @@ class _AudioAssistPageState extends State<AudioAssistPage> {
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
-          // Contextual Help Grid
+          // Contextual Help Grid (DIKEMBALIKAN SESUAI KODE ASLI)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -261,23 +523,41 @@ class _AudioAssistPageState extends State<AudioAssistPage> {
               ),
             ),
           ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 120),
-          ), // Spacer for bottom nav
+          const SliverToBoxAdapter(child: SizedBox(height: 120)),
         ],
       ),
     );
   }
 
-  Widget _buildWaveBar({required double height, required double opacity}) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 2),
-      width: 4,
-      height: height,
-      decoration: BoxDecoration(
-        color: const Color(0xFF8BD6B4).withValues(alpha: opacity),
-        borderRadius: BorderRadius.circular(2),
-      ),
+  // --- Widget Animasi Wave ---
+  Widget _buildWaveBar({
+    required double height,
+    required double opacity,
+    required int index,
+  }) {
+    return AnimatedBuilder(
+      animation: _waveController,
+      builder: (context, child) {
+        double currentHeight = height;
+
+        if (_isListening && _isMicEnabled) {
+          double wave = math.sin(
+            (_waveController.value * math.pi * 2) + (index * 1.0),
+          );
+          currentHeight = height + (wave * 20).abs();
+        }
+
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 100),
+          margin: const EdgeInsets.symmetric(horizontal: 2),
+          width: 4,
+          height: currentHeight,
+          decoration: BoxDecoration(
+            color: const Color(0xFF8BD6B4).withValues(alpha: opacity),
+            borderRadius: BorderRadius.circular(2),
+          ),
+        );
+      },
     );
   }
 
