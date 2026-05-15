@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+// ignore: unused_import
 import 'package:google_fonts/google_fonts.dart';
 import 'package:camera/camera.dart';
 import '../../../shared/widgets/setara_sliver_app_bar.dart';
@@ -86,6 +87,7 @@ class _ScannerPageState extends State<ScannerPage> {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
+                    // ignore: deprecated_member_use
                     color: Colors.black.withOpacity(0.5),
                     blurRadius: 15,
                     offset: const Offset(0, 8),

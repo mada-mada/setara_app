@@ -133,6 +133,7 @@ class Homepage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(24),
                       onTap: () {
                         // Aksi ketika card ditekan
+                        context.read<BottomNavProvider>().setIndex(3);
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
