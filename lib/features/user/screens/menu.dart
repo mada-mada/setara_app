@@ -114,7 +114,6 @@ class _MenuPageState extends State<MenuPage> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
                           Text(
                             place["desc"],
                             maxLines: 2,

@@ -4,32 +4,70 @@ import 'package:provider/provider.dart';
 import '../../../shared/providers/bottom_navbar_provider.dart';
 import '../../../shared/widgets/setara_bottom_nav_bar.dart';
 
-class EthosCoffeeLabPage extends StatelessWidget {
+class EthosCoffeeLabPage extends StatefulWidget {
   const EthosCoffeeLabPage({super.key});
+
+  @override
+  State<EthosCoffeeLabPage> createState() => _EthosCoffeeLabPageState();
+}
+
+class _EthosCoffeeLabPageState extends State<EthosCoffeeLabPage> {
+  String selectedCategory = 'Semua';
+
+  final List<Map<String, String>> menus = [
+    {
+      "name": "Avocado Toast Classic",
+      "category": "Makanan",
+      "desc":
+          "Sourdough bread, mashed avocado, poached egg, and chili flakes.",
+      "price": "IDR 65k",
+    },
+    {
+      "name": "Ethos Breakfast Platter",
+      "category": "Makanan",
+      "desc": "Smoked beef, scrambled eggs, roasted tomato, and hashbrowns.",
+      "price": "IDR 85k",
+    },
+    {
+      "name": "Truffle Mushroom Pasta",
+      "category": "Makanan",
+      "desc":
+          "Creamy fettuccine with seasonal mushrooms and premium truffle oil.",
+      "price": "IDR 95k",
+    },
+    {
+      "name": "Signature Cold Brew",
+      "category": "Minuman",
+      "desc": "Slow-steeped coffee with chocolate finish and low acidity.",
+      "price": "IDR 38k",
+    },
+    {
+      "name": "Oatmilk Latte",
+      "category": "Minuman",
+      "desc": "Espresso blend with steamed oatmilk and balanced caramel notes.",
+      "price": "IDR 42k",
+    },
+  ];
+
+  List<String> get categories {
+    final uniqueCategories =
+        menus.map((menu) => menu['category']!).toSet().toList();
+    return ['Semua', ...uniqueCategories];
+  }
+
+  List<Map<String, String>> get filteredMenus {
+    if (selectedCategory == 'Semua') {
+      return menus;
+    }
+
+    return menus
+        .where((menu) => menu['category'] == selectedCategory)
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     final bottomNavProvider = Provider.of<BottomNavProvider>(context);
-
-    final List<Map<String, String>> menus = [
-      {
-        "name": "Avocado Toast Classic",
-        "desc":
-            "Sourdough bread, mashed avocado, poached egg, and chili flakes.",
-        "price": "IDR 65k",
-      },
-      {
-        "name": "Ethos Breakfast Platter",
-        "desc": "Smoked beef, scrambled eggs, roasted tomato, and hashbrowns.",
-        "price": "IDR 85k",
-      },
-      {
-        "name": "Truffle Mushroom Pasta",
-        "desc":
-            "Creamy fettuccine with seasonal mushrooms and premium truffle oil.",
-        "price": "IDR 95k",
-      },
-    ];
 
     return Scaffold(
       backgroundColor: const Color(0xFF15130D),
@@ -86,7 +124,59 @@ class EthosCoffeeLabPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          ...menus.map((menu) {
+          SizedBox(
+            height: 52,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: categories.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final category = categories[index];
+                final isSelected = category == selectedCategory;
+
+                return InkWell(
+                  onTap: () {
+                    setState(() {
+                      selectedCategory = category;
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(999),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFFE0B04B)
+                          : const Color(0xFF221F19),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: isSelected
+                            ? const Color(0xFFE0B04B)
+                            : const Color(0xFF3A352B),
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        category,
+                        style: GoogleFonts.lexend(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: isSelected
+                              ? const Color(0xFF15130D)
+                              : const Color(0xFFE8E2D8),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 24),
+          ...filteredMenus.map((menu) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 24.0),
               child: Container(
@@ -110,7 +200,26 @@ class EthosCoffeeLabPage extends StatelessWidget {
                               color: const Color(0xFFE8E2D8),
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2C2A23),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              menu["category"]!,
+                              style: GoogleFonts.lexend(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFFE0B04B),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
                           Text(
                             menu["desc"]!,
                             style: GoogleFonts.lexend(
