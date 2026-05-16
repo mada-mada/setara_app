@@ -18,8 +18,7 @@ class _EthosCoffeeLabPageState extends State<EthosCoffeeLabPage> {
     {
       "name": "Avocado Toast Classic",
       "category": "Makanan",
-      "desc":
-          "Sourdough bread, mashed avocado, poached egg, and chili flakes.",
+      "desc": "Sourdough bread, mashed avocado, poached egg, and chili flakes.",
       "price": "IDR 65k",
     },
     {
@@ -50,8 +49,10 @@ class _EthosCoffeeLabPageState extends State<EthosCoffeeLabPage> {
   ];
 
   List<String> get categories {
-    final uniqueCategories =
-        menus.map((menu) => menu['category']!).toSet().toList();
+    final uniqueCategories = menus
+        .map((menu) => menu['category']!)
+        .toSet()
+        .toList();
     return ['Semua', ...uniqueCategories];
   }
 
@@ -60,9 +61,7 @@ class _EthosCoffeeLabPageState extends State<EthosCoffeeLabPage> {
       return menus;
     }
 
-    return menus
-        .where((menu) => menu['category'] == selectedCategory)
-        .toList();
+    return menus.where((menu) => menu['category'] == selectedCategory).toList();
   }
 
   @override
@@ -129,7 +128,7 @@ class _EthosCoffeeLabPageState extends State<EthosCoffeeLabPage> {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: categories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
               itemBuilder: (context, index) {
                 final category = categories[index];
                 final isSelected = category == selectedCategory;
