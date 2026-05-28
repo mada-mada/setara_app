@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:setara_app/features/user/screens/login.dart';
+import 'package:setara_app/features/auth/login.dart';
 import 'package:setara_app/shared/providers/bottom_navbar_provider.dart';
 
 void main() {
