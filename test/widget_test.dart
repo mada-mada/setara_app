@@ -11,20 +11,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:setara_app/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('App rendering and navigation test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(const Main());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verify that the login page is rendered.
+    expect(find.text('Selamat Datang'), findsOneWidget);
+    expect(find.text('Daftar'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Scroll 'Daftar' into view and tap on it to go to SignUpPage
+    final daftarFinder = find.text('Daftar');
+    await tester.ensureVisible(daftarFinder);
+    await tester.tap(daftarFinder);
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that the Sign Up page is rendered.
+    expect(find.text('Buat Akun Baru'), findsOneWidget);
   });
 }
