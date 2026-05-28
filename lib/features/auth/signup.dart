@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'auth_page_route.dart';
 import 'login.dart';
 import '../user/screens/main_wrapper.dart';
+import '../../shared/navigation/app_page_transition.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -123,7 +125,7 @@ class _SignUpPageState extends State<SignUpPage>
           // Lanjut masuk ke aplikasi
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const MainWrapper()),
+            buildAppPageRoute(const MainWrapper()),
           );
         }
       });
@@ -651,9 +653,7 @@ class _SignUpPageState extends State<SignUpPage>
                             HapticFeedback.mediumImpact();
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => const MainWrapper(),
-                              ),
+                              buildAppPageRoute(const MainWrapper()),
                             );
                           },
                           child: Container(
@@ -711,9 +711,7 @@ class _SignUpPageState extends State<SignUpPage>
                                 HapticFeedback.lightImpact();
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const LoginPage(),
-                                  ),
+                                  buildAuthPageRoute(const LoginPage()),
                                 );
                               },
                               child: Text(

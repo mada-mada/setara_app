@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'auth_page_route.dart';
 import 'login.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -110,9 +111,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
                       Navigator.pop(context); // Close dialog
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginPage(),
-                        ),
+                        buildAuthPageRoute(const LoginPage()),
                         (route) => false,
                       );
                     },
