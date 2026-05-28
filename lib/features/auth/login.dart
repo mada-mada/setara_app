@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'signup.dart';
+import 'forgot_password.dart';
 import '../user/screens/main_wrapper.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -369,16 +370,10 @@ class _LoginPageState extends State<LoginPage>
                               child: TextButton(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
-                                  // Navigasi ke Lupa Sandi atau berikan notifikasi sederhana
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      backgroundColor: const Color(0xFF2C2A23),
-                                      content: Text(
-                                        "Fitur Lupa Sandi akan segera hadir!",
-                                        style: GoogleFonts.lexend(
-                                          color: const Color(0xFFE8E2D8),
-                                        ),
-                                      ),
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const ForgotPasswordPage(),
                                     ),
                                   );
                                 },
