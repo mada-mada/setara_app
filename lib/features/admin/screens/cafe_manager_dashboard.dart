@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../shared/navigation/app_page_transition.dart';
+import 'menu_item_form_page.dart';
 
 class CafeManagerDashboard extends StatefulWidget {
   const CafeManagerDashboard({super.key});
@@ -17,7 +19,6 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
       "price": "Rp 38.000",
       "category": "Kopi Dingin",
       "isAvailable": true,
-      "accessibilityTags": ["Audio Deskripsi", "Ramah Sensorik"],
       "imagePlaceholderColor": const Color(0xFF3E2723), // Dark Brown
       "imageUrl": null, // Ready for dynamic image URL
     },
@@ -26,7 +27,6 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
       "price": "Rp 42.000",
       "category": "Kopi Susu",
       "isAvailable": true,
-      "accessibilityTags": ["Menu Braille", "Rendah Kafein"],
       "imagePlaceholderColor": const Color(0xFF4E342E), // Brown
       "imageUrl": null,
     },
@@ -35,7 +35,6 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
       "price": "Rp 28.000",
       "category": "Pastry",
       "isAvailable": false,
-      "accessibilityTags": ["Bebas Gluten"],
       "imagePlaceholderColor": const Color(0xFFD84315), // Deep Orange/Pastry
       "imageUrl": null,
     },
@@ -44,7 +43,6 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
       "price": "Rp 32.000",
       "category": "Teh Herbal",
       "isAvailable": true,
-      "accessibilityTags": ["Ramah Sensorik", "Bebas Kafein"],
       "imagePlaceholderColor": const Color(0xFFE65100), // Orange
       "imageUrl": null,
     },
@@ -53,7 +51,6 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
       "price": "Rp 48.000",
       "category": "Makanan Berat",
       "isAvailable": true,
-      "accessibilityTags": ["Menu Braille", "Ramah Alergi"],
       "imagePlaceholderColor": const Color(0xFF1B5E20), // Green
       "imageUrl": null,
     },
@@ -61,13 +58,44 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
 
   bool _isAudioAssistEnabled = true;
 
-  void _showAddItemDialog() {
+  Future<void> _openItemForm({int? itemIndex}) async {
     HapticFeedback.mediumImpact();
+    final isEditing = itemIndex != null;
+    final editIndex = itemIndex;
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      buildAppPageRoute(
+        MenuItemFormPage(
+          initialItem: isEditing ? _menuItems[editIndex!] : null,
+        ),
+      ),
+    );
+
+    if (result == null || !mounted) {
+      return;
+    }
+
+    setState(() {
+      if (isEditing) {
+        _menuItems[editIndex!] = result;
+      } else {
+        _menuItems.add(result);
+      }
+    });
+  }
+
+  void _deleteMenuItem(int itemIndex) {
+    HapticFeedback.mediumImpact();
+    final removedItem = _menuItems[itemIndex];
+    setState(() {
+      _menuItems.removeAt(itemIndex);
+    });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: const Color(0xFF005C42),
+        backgroundColor: const Color(0xFF221F19),
+        behavior: SnackBarBehavior.floating,
         content: Text(
-          "Fitur tambah menu akan segera hadir!",
+          "${removedItem["name"]} dihapus",
           style: GoogleFonts.lexend(
             color: const Color(0xFFE8E2D8),
             fontWeight: FontWeight.w600,
@@ -217,7 +245,7 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            "Otomatis membacakan menu bagi tuna netra",
+                            "Saat aktif, semua menu tersedia untuk text to speech",
                             style: GoogleFonts.lexend(
                               fontSize: 12,
                               color: const Color(0xFFCDC6B3).withValues(alpha: 0.6),
@@ -259,7 +287,7 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
                     ),
                   ),
                   TextButton.icon(
-                    onPressed: _showAddItemDialog,
+                    onPressed: () => _openItemForm(),
                     icon: const Icon(Icons.add_rounded, size: 18, color: Color(0xFFFDE68A)),
                     label: Text(
                       "Tambah",
@@ -282,7 +310,7 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
                 physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
                   final item = _menuItems[index];
-                  return _buildMenuCard(item);
+                  return _buildMenuCard(item, index);
                 },
               ),
             ),
@@ -342,9 +370,8 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
     );
   }
 
-  Widget _buildMenuCard(Map<String, dynamic> item) {
+  Widget _buildMenuCard(Map<String, dynamic> item, int itemIndex) {
     final bool isAvailable = item["isAvailable"];
-    final List<String> tags = List<String>.from(item["accessibilityTags"]);
     final Color placeholderBg = item["imagePlaceholderColor"];
     final String? imageUrl = item["imageUrl"];
 
@@ -412,29 +439,49 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      // Availability Indicator Badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isAvailable
-                              ? const Color(0xFF005C42).withValues(alpha: 0.3)
-                              : const Color(0xFFD84315).withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          isAvailable ? "Tersedia" : "Habis",
-                          style: GoogleFonts.lexend(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: isAvailable
-                                ? const Color(0xFF8BD6B4)
-                                : const Color(0xFFFF8A65),
+                      const SizedBox(width: 8),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isAvailable
+                                  ? const Color(
+                                      0xFF005C42,
+                                    ).withValues(alpha: 0.3)
+                                  : const Color(
+                                      0xFFD84315,
+                                    ).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              isAvailable ? "Tersedia" : "Habis",
+                              style: GoogleFonts.lexend(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: isAvailable
+                                    ? const Color(0xFF8BD6B4)
+                                    : const Color(0xFFFF8A65),
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 4),
+                          _buildMenuActionButton(
+                            icon: Icons.edit_rounded,
+                            color: const Color(0xFFFDE68A),
+                            onPressed: () => _openItemForm(itemIndex: itemIndex),
+                          ),
+                          const SizedBox(width: 2),
+                          _buildMenuActionButton(
+                            icon: Icons.delete_outline_rounded,
+                            color: const Color(0xFFFF8A65),
+                            onPressed: () => _deleteMenuItem(itemIndex),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -455,52 +502,29 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
                       color: const Color(0xFFFDE68A),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  // Accessibility Tags Row
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 4,
-                    children: tags.map((tag) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1D1B15),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: const Color(0xFFFDE68A).withValues(alpha: 0.15),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.accessibility_new_rounded,
-                              size: 10,
-                              color: Color(0xFFFDE68A),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              tag,
-                              style: GoogleFonts.lexend(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFFE8E2D8),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildMenuActionButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return SizedBox(
+      height: 32,
+      width: 32,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+        visualDensity: VisualDensity.compact,
+        icon: Icon(icon, size: 18, color: color),
+        onPressed: onPressed,
       ),
     );
   }
