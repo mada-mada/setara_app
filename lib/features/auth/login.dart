@@ -7,6 +7,10 @@ import 'forgot_password.dart';
 import '../user/screens/main_wrapper.dart';
 import '../../shared/navigation/app_page_transition.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -50,6 +54,117 @@ class _LoginPageState extends State<LoginPage>
     super.dispose();
   }
 
+  Future<void> _handleGoogleAuth() async {
+    HapticFeedback.mediumImpact();
+
+    // 1. Tampilkan loading dialog premium Anda
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: const Color(0xFF221F19),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: const Color(0xFFFDE68A), width: 2),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFDE68A)),
+                strokeWidth: 4,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                "Menghubungkan ke Google...",
+                style: GoogleFonts.lexend(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFFE8E2D8),
+                  decoration: TextDecoration.none,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    try {
+      // 2. Inisialisasi Google Sign-In instance dengan serverClientId (wajib di v7+)
+      await GoogleSignIn.instance.initialize(
+        serverClientId:
+            '140173379906-n47i8u9cvfu92ni7jkm87cbfb8aen67m.apps.googleusercontent.com',
+      );
+
+      // 3. Mulai proses Google Sign-In bawaan HP
+      final googleUser = await GoogleSignIn.instance.authenticate();
+
+      // 4. Dapatkan ID Token dari Google
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+
+      if (idToken == null) throw Exception("Gagal mendapatkan token Google.");
+
+      // 5. Kirim Token ke Backend Laravel Anda
+      final response = await http.post(
+        Uri.parse('http://192.168.1.10:8000/api/auth/google-login'),
+        body: {'id_token': idToken},
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        final String customToken = responseData['custom_token'];
+
+        // 6. Autentikasi ke Firebase menggunakan Custom Token dari Laravel
+        await FirebaseAuth.instance.signInWithCustomToken(customToken);
+
+        // 7. Sukses! Arahkan ke halaman utama
+        if (mounted) {
+          Navigator.pop(context); // Tutup loading
+          Navigator.pushReplacement(
+            context,
+            buildAppPageRoute(const MainWrapper()),
+          );
+        }
+      } else {
+        throw Exception("Autentikasi di server gagal: ${response.body}");
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Tutup loading
+
+        debugPrint("====== ERROR LOGIN GOOGLE ======");
+        debugPrint(e.toString());
+        debugPrint("================================");
+
+        // Periksa apakah error disebabkan oleh pembatalan pengguna
+        final errorStr = e.toString().toLowerCase();
+        final isCanceled =
+            errorStr.contains('canceled') ||
+            errorStr.contains('cancelled') ||
+            errorStr.contains('sign_in_failed') ||
+            errorStr.contains('user-cancelled') ||
+            errorStr.contains('12501'); // Kode standar API Google untuk cancel
+
+        if (!isCanceled) {
+          // Tampilkan error menggunakan SnackBar jika bukan pembatalan
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.redAccent,
+              content: Text(
+                "Terjadi kesalahan: $e",
+                style: GoogleFonts.lexend(color: Colors.white),
+              ),
+            ),
+          );
+        }
+      }
+    }
+  }
+
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
       HapticFeedback.mediumImpact();
@@ -90,7 +205,7 @@ class _LoginPageState extends State<LoginPage>
       );
 
       // Simulasi delay login
-      Future.delayed(const Duration(seconds: 1500), () {
+      Future.delayed(const Duration(milliseconds: 1500), () {
         if (mounted) {
           Navigator.pop(context); // Tutup dialog
           Navigator.pushReplacement(
@@ -472,12 +587,8 @@ class _LoginPageState extends State<LoginPage>
                         child: InkWell(
                           borderRadius: BorderRadius.circular(9999),
                           onTap: () {
-                            HapticFeedback.mediumImpact();
-                            // Simulasi sukses masuk lewat Google
-                            Navigator.pushReplacement(
-                              context,
-                              buildAppPageRoute(const MainWrapper()),
-                            );
+                            HapticFeedback.lightImpact();
+                            _handleGoogleAuth();
                           },
                           child: Container(
                             height: 60,

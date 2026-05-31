@@ -12,7 +12,20 @@
           "package_name": "com.example.setara_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "140173379906-bkdj2h60jqhae0dgkjvh1o24otjua29l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.setara_app",
+            "certificate_hash": "1d7a5d234eebce5b1b2af4091e99bf549dfa045d"
+          }
+        },
+        {
+          "client_id": "140173379906-n47i8u9cvfu92ni7jkm87cbfb8aen67m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB9Y7W48c2MisU4bcuIojWGaL065xKSlL0"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "140173379906-n47i8u9cvfu92ni7jkm87cbfb8aen67m.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "140173379906-fcr9qrmfrbng7e5lgpe9vscc6gll257d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.setaraApp"
+              }
+            }
+          ]
         }
       }
     },
@@ -31,7 +56,20 @@
           "package_name": "com.setara.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "140173379906-38u62gec1gllv9eknu1tkl9cdvti8ea5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.setara.app",
+            "certificate_hash": "1d7a5d234eebce5b1b2af4091e99bf549dfa045d"
+          }
+        },
+        {
+          "client_id": "140173379906-n47i8u9cvfu92ni7jkm87cbfb8aen67m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB9Y7W48c2MisU4bcuIojWGaL065xKSlL0"
@@ -39,7 +77,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "140173379906-n47i8u9cvfu92ni7jkm87cbfb8aen67m.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "140173379906-fcr9qrmfrbng7e5lgpe9vscc6gll257d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.setaraApp"
+              }
+            }
+          ]
         }
       }
     }

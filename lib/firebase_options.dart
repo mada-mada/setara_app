@@ -67,6 +67,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '140173379906',
     projectId: 'setara-app-ab081',
     storageBucket: 'setara-app-ab081.firebasestorage.app',
+    androidClientId: '140173379906-38u62gec1gllv9eknu1tkl9cdvti8ea5.apps.googleusercontent.com',
+    iosClientId: '140173379906-fcr9qrmfrbng7e5lgpe9vscc6gll257d.apps.googleusercontent.com',
     iosBundleId: 'com.example.setaraApp',
   );
 
