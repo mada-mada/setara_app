@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "140173379906",
+    "project_id": "setara-app-ab081",
+    "storage_bucket": "setara-app-ab081.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:140173379906:android:5aec916cf20dee177a60db",
+        "android_client_info": {
+          "package_name": "com.example.setara_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9Y7W48c2MisU4bcuIojWGaL065xKSlL0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:140173379906:android:c278bd4afcac0a457a60db",
+        "android_client_info": {
+          "package_name": "com.setara.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9Y7W48c2MisU4bcuIojWGaL065xKSlL0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
