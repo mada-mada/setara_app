@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'auth_page_route.dart';
 import 'login.dart';
+import 'providers/auth_provider.dart';
 import '../user/screens/main_wrapper.dart';
 import '../../shared/navigation/app_page_transition.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -130,6 +132,13 @@ class _SignUpPageState extends State<SignUpPage>
         }
       });
     }
+  }
+
+  Future<void> _handleGoogleAuth() async {
+    await Provider.of<AuthProvider>(context, listen: false).handleGoogleAuth(
+      context,
+      isSignUp: true,
+    );
   }
 
   @override
@@ -649,13 +658,7 @@ class _SignUpPageState extends State<SignUpPage>
                         borderRadius: BorderRadius.circular(9999),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(9999),
-                          onTap: () {
-                            HapticFeedback.mediumImpact();
-                            Navigator.pushReplacement(
-                              context,
-                              buildAppPageRoute(const MainWrapper()),
-                            );
-                          },
+                          onTap: _handleGoogleAuth,
                           child: Container(
                             height: 60,
                             decoration: BoxDecoration(
