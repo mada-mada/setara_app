@@ -53,50 +53,15 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Future<void> _handleGoogleAuth() async {
-    await Provider.of<AuthProvider>(context, listen: false).handleGoogleAuth(
+    await Provider.of<AuthProvider>(
       context,
-      isSignUp: false,
-    );
+      listen: false,
+    ).handleGoogleAuth(context, isSignUp: false);
   }
 
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
       HapticFeedback.mediumImpact();
-
-      // Tampilkan loading dialog atau animasi sukses yang premium
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => Center(
-          child: Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: const Color(0xFF221F19),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: const Color(0xFFFDE68A), width: 2),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFDE68A)),
-                  strokeWidth: 4,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  "Masuk...",
-                  style: GoogleFonts.lexend(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFFE8E2D8),
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
 
       // Simulasi delay login
       Future.delayed(const Duration(milliseconds: 1500), () {

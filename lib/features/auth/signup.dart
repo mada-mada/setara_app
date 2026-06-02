@@ -63,44 +63,6 @@ class _SignUpPageState extends State<SignUpPage>
     if (_formKey.currentState!.validate()) {
       HapticFeedback.mediumImpact();
 
-      // Tampilkan premium loading dialog
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => Center(
-          child: Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: const Color(0xFF221F19),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(
-                color: const Color(0xFF8BD6B4),
-                width: 2,
-              ), // Sage/Green border for sign up
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8BD6B4)),
-                  strokeWidth: 4,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  "Mendaftarkan...",
-                  style: GoogleFonts.lexend(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFFE8E2D8),
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-
       // Simulasi delay pendaftaran
       Future.delayed(const Duration(seconds: 1500), () {
         if (mounted) {
@@ -135,10 +97,10 @@ class _SignUpPageState extends State<SignUpPage>
   }
 
   Future<void> _handleGoogleAuth() async {
-    await Provider.of<AuthProvider>(context, listen: false).handleGoogleAuth(
+    await Provider.of<AuthProvider>(
       context,
-      isSignUp: true,
-    );
+      listen: false,
+    ).handleGoogleAuth(context, isSignUp: true);
   }
 
   @override

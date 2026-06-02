@@ -13,10 +13,15 @@ class AuthProvider extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
-  Future<void> handleGoogleAuth(BuildContext context, {required bool isSignUp}) async {
+  Future<void> handleGoogleAuth(
+    BuildContext context, {
+    required bool isSignUp,
+  }) async {
     HapticFeedback.mediumImpact();
 
-    final Color accentColor = isSignUp ? const Color(0xFF8BD6B4) : const Color(0xFFFDE68A);
+    final Color accentColor = isSignUp
+        ? const Color(0xFF8BD6B4)
+        : const Color(0xFFFDE68A);
 
     // Tampilkan loading dialog premium
     showDialog(
@@ -74,7 +79,7 @@ class AuthProvider extends ChangeNotifier {
 
       // Kirim Token ke Backend Laravel Anda
       final response = await http.post(
-        Uri.parse('http://192.168.1.10:8000/api/auth/google-login'),
+        Uri.parse('http://192.168.0.16:8000/api/auth/google-login'),
         body: {'id_token': idToken},
       );
 
