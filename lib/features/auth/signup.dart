@@ -5,8 +5,6 @@ import 'package:provider/provider.dart';
 import 'auth_page_route.dart';
 import 'login.dart';
 import 'providers/auth_provider.dart';
-import '../user/screens/main_wrapper.dart';
-import '../../shared/navigation/app_page_transition.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -61,38 +59,12 @@ class _SignUpPageState extends State<SignUpPage>
 
   void _handleSignUp() {
     if (_formKey.currentState!.validate()) {
-      HapticFeedback.mediumImpact();
-
-      // Simulasi delay pendaftaran
-      Future.delayed(const Duration(seconds: 1500), () {
-        if (mounted) {
-          Navigator.pop(context); // Tutup dialog
-
-          // Tampilkan notifikasi pendaftaran berhasil
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: const Color(0xFF005C42), // Green banner
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              content: Text(
-                "Pendaftaran berhasil! Selamat datang di SetaraApp.",
-                style: GoogleFonts.lexend(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          );
-
-          // Lanjut masuk ke aplikasi
-          Navigator.pushReplacement(
-            context,
-            buildAppPageRoute(const MainWrapper()),
-          );
-        }
-      });
+      Provider.of<AuthProvider>(context, listen: false).handleRegister(
+        context,
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
     }
   }
 
@@ -173,7 +145,7 @@ class _SignUpPageState extends State<SignUpPage>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Full Name Input Label
+                            // Nama Lengkap Input Label
                             Padding(
                               padding: const EdgeInsets.only(
                                 left: 4.0,
@@ -189,7 +161,7 @@ class _SignUpPageState extends State<SignUpPage>
                               ),
                             ),
 
-                            // Full Name Input Field
+                            // Nama Lengkap Input Field
                             Focus(
                               onFocusChange: (hasFocus) {
                                 setState(() {
@@ -226,6 +198,7 @@ class _SignUpPageState extends State<SignUpPage>
                                 ),
                                 child: TextFormField(
                                   controller: _nameController,
+                                  textCapitalization: TextCapitalization.words,
                                   style: GoogleFonts.lexend(
                                     color: const Color(0xFFE8E2D8),
                                     fontSize: 16,
@@ -237,7 +210,7 @@ class _SignUpPageState extends State<SignUpPage>
                                           ? const Color(0xFF8BD6B4)
                                           : const Color(0xFF97907F),
                                     ),
-                                    hintText: "Masukkan nama lengkap",
+                                    hintText: "Nama Lengkap Anda",
                                     hintStyle: GoogleFonts.lexend(
                                       color: const Color(
                                         0xFF97907F,
@@ -251,7 +224,7 @@ class _SignUpPageState extends State<SignUpPage>
                                   ),
                                   validator: (value) {
                                     if (value == null || value.trim().isEmpty) {
-                                      return "Silakan masukkan Nama Lengkap";
+                                      return "Silakan masukkan nama lengkap Anda";
                                     }
                                     return null;
                                   },

@@ -6,8 +6,6 @@ import 'auth_page_route.dart';
 import 'signup.dart';
 import 'forgot_password.dart';
 import 'providers/auth_provider.dart';
-import '../user/screens/main_wrapper.dart';
-import '../../shared/navigation/app_page_transition.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class LoginPage extends StatefulWidget {
@@ -61,18 +59,11 @@ class _LoginPageState extends State<LoginPage>
 
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
-      HapticFeedback.mediumImpact();
-
-      // Simulasi delay login
-      Future.delayed(const Duration(milliseconds: 1500), () {
-        if (mounted) {
-          Navigator.pop(context); // Tutup dialog
-          Navigator.pushReplacement(
-            context,
-            buildAppPageRoute(const MainWrapper()),
-          );
-        }
-      });
+      Provider.of<AuthProvider>(context, listen: false).handleLogin(
+        context,
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
     }
   }
 

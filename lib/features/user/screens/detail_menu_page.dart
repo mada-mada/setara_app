@@ -4,64 +4,35 @@ import 'package:provider/provider.dart';
 import '../../../shared/providers/bottom_navbar_provider.dart';
 import '../../../shared/widgets/setara_bottom_nav_bar.dart';
 
-class EthosCoffeeLabPage extends StatefulWidget {
-  const EthosCoffeeLabPage({super.key});
+class DetailMenuPage extends StatefulWidget {
+  final Map<String, dynamic> placeData;
+  const DetailMenuPage({super.key, required this.placeData});
 
   @override
-  State<EthosCoffeeLabPage> createState() => _EthosCoffeeLabPageState();
+  State<DetailMenuPage> createState() => _DetailMenuPageState();
 }
 
-class _EthosCoffeeLabPageState extends State<EthosCoffeeLabPage> {
+class _DetailMenuPageState extends State<DetailMenuPage> {
   String selectedCategory = 'Semua';
 
-  final List<Map<String, String>> menus = [
-    {
-      "name": "Avocado Toast Classic",
-      "category": "Makanan",
-      "desc": "Sourdough bread, mashed avocado, poached egg, and chili flakes.",
-      "price": "IDR 65k",
-    },
-    {
-      "name": "Ethos Breakfast Platter",
-      "category": "Makanan",
-      "desc": "Smoked beef, scrambled eggs, roasted tomato, and hashbrowns.",
-      "price": "IDR 85k",
-    },
-    {
-      "name": "Truffle Mushroom Pasta",
-      "category": "Makanan",
-      "desc":
-          "Creamy fettuccine with seasonal mushrooms and premium truffle oil.",
-      "price": "IDR 95k",
-    },
-    {
-      "name": "Signature Cold Brew",
-      "category": "Minuman",
-      "desc": "Slow-steeped coffee with chocolate finish and low acidity.",
-      "price": "IDR 38k",
-    },
-    {
-      "name": "Oatmilk Latte",
-      "category": "Minuman",
-      "desc": "Espresso blend with steamed oatmilk and balanced caramel notes.",
-      "price": "IDR 42k",
-    },
-  ];
+  List<Map<String, dynamic>> get menus {
+    return List<Map<String, dynamic>>.from(widget.placeData['menus'] ?? []);
+  }
 
   List<String> get categories {
     final uniqueCategories = menus
-        .map((menu) => menu['category']!)
+        .map((menu) => (menu['category_name'] as String?) ?? 'Lainnya')
         .toSet()
         .toList();
     return ['Semua', ...uniqueCategories];
   }
 
-  List<Map<String, String>> get filteredMenus {
+  List<Map<String, dynamic>> get filteredMenus {
     if (selectedCategory == 'Semua') {
       return menus;
     }
 
-    return menus.where((menu) => menu['category'] == selectedCategory).toList();
+    return menus.where((menu) => menu['category_name'] == selectedCategory).toList();
   }
 
   @override
@@ -96,7 +67,7 @@ class _EthosCoffeeLabPageState extends State<EthosCoffeeLabPage> {
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
         children: [
           Text(
-            "Ethos Coffee Lab",
+            widget.placeData['name'] ?? "Nama Tempat",
             style: GoogleFonts.plusJakartaSans(
               fontSize: 36,
               fontWeight: FontWeight.w800,
@@ -105,7 +76,7 @@ class _EthosCoffeeLabPageState extends State<EthosCoffeeLabPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            "Accessible modern roastery specializing in ethical sourcing and supportive environments for all.",
+            widget.placeData['description'] ?? "Tidak ada deskripsi",
             style: GoogleFonts.lexend(
               fontSize: 20,
               fontWeight: FontWeight.w500,
@@ -192,7 +163,7 @@ class _EthosCoffeeLabPageState extends State<EthosCoffeeLabPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            menu["name"]!,
+                            menu["name"] ?? "Nama Menu",
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 24,
                               fontWeight: FontWeight.w700,
@@ -210,7 +181,7 @@ class _EthosCoffeeLabPageState extends State<EthosCoffeeLabPage> {
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: Text(
-                              menu["category"]!,
+                              menu["category_name"] ?? "Kategori",
                               style: GoogleFonts.lexend(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
@@ -220,7 +191,7 @@ class _EthosCoffeeLabPageState extends State<EthosCoffeeLabPage> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            menu["desc"]!,
+                            menu["description"] ?? "Tidak ada deskripsi.",
                             style: GoogleFonts.lexend(
                               fontSize: 16,
                               fontWeight: FontWeight.w400,
@@ -230,7 +201,7 @@ class _EthosCoffeeLabPageState extends State<EthosCoffeeLabPage> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            menu["price"]!,
+                            menu["price"] != null ? "Rp ${menu["price"]}" : "Rp 0",
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 32,
                               fontWeight: FontWeight.w700,

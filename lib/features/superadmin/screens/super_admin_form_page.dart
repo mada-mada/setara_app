@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class SuperAdminFormPage extends StatefulWidget {
   const SuperAdminFormPage({super.key, this.initialAdmin});
@@ -18,6 +20,7 @@ class _SuperAdminFormPageState extends State<SuperAdminFormPage> {
   late final TextEditingController _passwordController;
   late final TextEditingController _cafeNameController;
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   bool get _isEditing => widget.initialAdmin != null;
 
@@ -40,22 +43,67 @@ class _SuperAdminFormPageState extends State<SuperAdminFormPage> {
     super.dispose();
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
     HapticFeedback.mediumImpact();
-    Navigator.pop(context, {
-      ...?widget.initialAdmin,
-      "name": _nameController.text.trim(),
-      "email": _emailController.text.trim(),
-      "password": _passwordController.text,
-      "cafeName": _cafeNameController.text.trim(),
-      "avatarColor":
-          widget.initialAdmin?["avatarColor"] ?? const Color(0xFFE65100),
-      "imageUrl": widget.initialAdmin?["imageUrl"],
+
+    if (_isEditing) {
+      // Return updated data (local mock since backend doesn't support update yet)
+      Navigator.pop(context, {
+        ...?widget.initialAdmin,
+        "name": _nameController.text.trim(),
+        "email": _emailController.text.trim(),
+        "password": _passwordController.text,
+        "cafeName": _cafeNameController.text.trim(),
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
     });
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://192.168.0.16:8000/api/users'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'name': _nameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text,
+          'role': 'resto_admin',
+          'cafe_name': _cafeNameController.text.trim(),
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        if (mounted) {
+          Navigator.pop(context, true); // Indicate success for new addition
+        }
+      } else {
+        final body = jsonDecode(response.body);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(body['message'] ?? 'Gagal membuat admin')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Terjadi kesalahan jaringan')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -180,14 +228,23 @@ class _SuperAdminFormPageState extends State<SuperAdminFormPage> {
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                  onPressed: _submitForm,
-                  child: Text(
-                    _isEditing ? "Simpan Perubahan" : "Tambah Admin",
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+                  onPressed: _isLoading ? null : _submitForm,
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF121212),
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          _isEditing ? "Simpan Perubahan" : "Tambah Admin",
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                 ),
               ],
             ),

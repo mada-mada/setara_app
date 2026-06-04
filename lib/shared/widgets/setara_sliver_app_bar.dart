@@ -51,7 +51,8 @@ class SetaraSliverAppBar extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 24.0),
                 child: IconButton(
                   icon: const Icon(Icons.settings, color: Color(0xFFFFFFFF)),
-                  onPressed: onSettingsTap,
+                  onPressed: onSettingsTap ??
+                      () => Scaffold.of(context).openEndDrawer(),
                 ),
               ),
             ]

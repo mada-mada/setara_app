@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:setara_app/shared/widgets/setara_end_drawer.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:translator/translator.dart';
@@ -216,6 +217,7 @@ class _AudioAssistPageState extends State<AudioAssistPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF15130D),
+      endDrawer: const SetaraEndDrawer(),
       body: CustomScrollView(
         slivers: [
           const SetaraSliverAppBar(),

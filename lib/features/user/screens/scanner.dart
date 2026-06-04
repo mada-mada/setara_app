@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 // ignore: unused_import
 import 'package:google_fonts/google_fonts.dart';
 import 'package:camera/camera.dart';
+import 'package:setara_app/shared/widgets/setara_end_drawer.dart';
 import '../../../shared/widgets/setara_sliver_app_bar.dart';
 
 class ScannerPage extends StatefulWidget {
@@ -72,6 +73,7 @@ class _ScannerPageState extends State<ScannerPage> {
     }
     return Scaffold(
       backgroundColor: const Color(0xFF15130D),
+      endDrawer: const SetaraEndDrawer(),
       body: CustomScrollView(
         slivers: [
           const SetaraSliverAppBar(),
