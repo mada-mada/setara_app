@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../providers/super_admin_nav_provider.dart';
 import '../../../shared/navigation/app_page_transition.dart';
+import '../../../shared/widgets/setara_end_drawer.dart';
 import 'super_admin_form_page.dart';
 import 'super_admin_restaurants_page.dart';
 
@@ -190,8 +191,10 @@ class _SuperAdminCentralPageState extends State<SuperAdminCentralPage> {
       create: (_) => SuperAdminNavProvider(),
       child: Builder(
         builder: (providerContext) => Scaffold(
+          key: providerContext.read<SuperAdminNavProvider>().scaffoldKey,
           backgroundColor: const Color(0xFF15130D),
-          appBar: _buildAppBar(),
+          appBar: _buildAppBar(providerContext),
+          endDrawer: const SetaraEndDrawer(),
           body: Stack(
             children: [
               // Content Scroll
@@ -209,7 +212,7 @@ class _SuperAdminCentralPageState extends State<SuperAdminCentralPage> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(BuildContext providerContext) {
     return AppBar(
       backgroundColor: const Color(0xFF1D1B15),
       elevation: 0,
@@ -237,12 +240,13 @@ class _SuperAdminCentralPageState extends State<SuperAdminCentralPage> {
       actions: [
         IconButton(
           icon: const Icon(
-            Icons.notifications_outlined,
+            Icons.menu_open_rounded,
             color: Color(0xFFE8E2D8),
             size: 26,
           ),
           onPressed: () {
             HapticFeedback.lightImpact();
+            providerContext.read<SuperAdminNavProvider>().openEndDrawer();
           },
         ),
         const SizedBox(width: 12),

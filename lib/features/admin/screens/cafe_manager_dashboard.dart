@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import '../../../shared/navigation/app_page_transition.dart';
+import '../../../shared/widgets/setara_end_drawer.dart';
+import '../providers/admin_dashboard_provider.dart';
 import 'menu_item_form_page.dart';
 
 class CafeManagerDashboard extends StatefulWidget {
@@ -130,10 +133,15 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF15130D),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
+    return ChangeNotifierProvider(
+      create: (_) => AdminDashboardProvider(),
+      child: Builder(
+        builder: (providerContext) => Scaffold(
+          key: providerContext.read<AdminDashboardProvider>().scaffoldKey,
+          backgroundColor: const Color(0xFF15130D),
+          endDrawer: const SetaraEndDrawer(),
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
@@ -157,11 +165,12 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
         actions: [
           IconButton(
             icon: const Icon(
-              Icons.notifications_outlined,
+              Icons.menu_open_rounded,
               color: Color(0xFFE8E2D8),
             ),
             onPressed: () {
               HapticFeedback.lightImpact();
+              providerContext.read<AdminDashboardProvider>().openEndDrawer();
             },
           ),
           const SizedBox(width: 8),
@@ -355,7 +364,9 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
           ],
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 
   Widget _buildStatCard({

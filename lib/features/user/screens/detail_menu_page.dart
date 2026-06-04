@@ -147,6 +147,9 @@ class _DetailMenuPageState extends State<DetailMenuPage> {
           ),
           const SizedBox(height: 24),
           ...filteredMenus.map((menu) {
+            final String? imageUrl = menu["image_url"]?.toString();
+            final bool hasImage = imageUrl != null && imageUrl.isNotEmpty;
+
             return Padding(
               padding: const EdgeInsets.only(bottom: 24.0),
               child: Container(
@@ -155,91 +158,121 @@ class _DetailMenuPageState extends State<DetailMenuPage> {
                   color: const Color(0xFF221F19),
                   borderRadius: BorderRadius.circular(24),
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            menu["name"] ?? "Nama Menu",
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFFE8E2D8),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF2C2A23),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              menu["category_name"] ?? "Kategori",
-                              style: GoogleFonts.lexend(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFFE0B04B),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            menu["description"] ?? "Tidak ada deskripsi.",
-                            style: GoogleFonts.lexend(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              height: 1.6,
-                              color: const Color(0xFFCDC6B3),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            menu["price"] != null ? "Rp ${menu["price"]}" : "Rp 0",
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFFF9E287),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 24),
-                    Column(
-                      children: [
-                        Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF37352E),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(
-                            Icons.info_outline,
-                            color: Color(0xFFE8E2D8),
-                            size: 30,
+                    if (hasImage)
+                      Container(
+                        height: 180,
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 20),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: const Color(0xFF3E2723).withValues(alpha: 0.3),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Center(
+                                  child: Icon(
+                                    Icons.restaurant_menu_rounded,
+                                    color: Color(0xFF97907F),
+                                    size: 48,
+                                  ),
+                                ),
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF8BD6B4),
-                            borderRadius: BorderRadius.circular(16),
+                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                menu["name"] ?? "Nama Menu",
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFFE8E2D8),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF2C2A23),
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  menu["category_name"] ?? "Kategori",
+                                  style: GoogleFonts.lexend(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFFE0B04B),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                menu["description"] ?? "Tidak ada deskripsi.",
+                                style: GoogleFonts.lexend(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  height: 1.6,
+                                  color: const Color(0xFFCDC6B3),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                menu["price"] != null ? "Rp ${menu["price"]}" : "Rp 0",
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFFF9E287),
+                                ),
+                              ),
+                            ],
                           ),
-                          child: const Icon(
-                            Icons.add,
-                            color: Color(0xFF002115),
-                            size: 30,
-                          ),
+                        ),
+                        const SizedBox(width: 24),
+                        Column(
+                          children: [
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF37352E),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Icon(
+                                Icons.info_outline,
+                                color: Color(0xFFE8E2D8),
+                                size: 30,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF8BD6B4),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Icon(
+                                Icons.add,
+                                color: Color(0xFF002115),
+                                size: 30,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

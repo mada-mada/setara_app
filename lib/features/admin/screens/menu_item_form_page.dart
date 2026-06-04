@@ -68,12 +68,29 @@ class _MenuItemFormPageState extends State<MenuItemFormPage> {
     HapticFeedback.mediumImpact();
     setState(() => _isLoading = true);
 
+    if (widget.placeId.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.redAccent,
+            content: Text(
+              "Error: ID Restoran tidak valid. Pastikan akun ini memiliki restoran.",
+              style: GoogleFonts.lexend(color: Colors.white),
+            ),
+          ),
+        );
+        setState(() => _isLoading = false);
+      }
+      return;
+    }
+
     final url = _isEditing
         ? 'http://192.168.0.16:8000/api/places/${widget.placeId}/menus/${widget.initialItem!["id"]}'
         : 'http://192.168.0.16:8000/api/places/${widget.placeId}/menus';
 
     try {
       var request = http.MultipartRequest('POST', Uri.parse(url));
+      request.headers['Accept'] = 'application/json';
 
       if (_isEditing) {
         request.fields['_method'] = 'PUT';
