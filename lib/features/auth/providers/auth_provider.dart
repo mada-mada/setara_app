@@ -9,6 +9,7 @@ import 'package:setara_app/features/user/screens/main_wrapper.dart';
 import 'package:setara_app/features/admin/screens/cafe_manager_dashboard.dart';
 import 'package:setara_app/features/superadmin/screens/super_admin_central.dart';
 import 'package:setara_app/shared/navigation/app_page_transition.dart';
+import 'package:setara_app/services/notification_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
@@ -98,6 +99,7 @@ class AuthProvider extends ChangeNotifier {
 
         // Autentikasi ke Firebase menggunakan Custom Token dari Laravel
         await FirebaseAuth.instance.signInWithCustomToken(customToken);
+        await NotificationService.saveDeviceToken();
 
         // Sukses! Arahkan ke halaman utama
         if (context.mounted) {
@@ -230,6 +232,7 @@ class AuthProvider extends ChangeNotifier {
 
         // Autentikasi ke Firebase menggunakan Custom Token
         await FirebaseAuth.instance.signInWithCustomToken(customToken);
+        await NotificationService.saveDeviceToken();
 
         if (context.mounted) {
           Navigator.pop(context); // Tutup loading dialog
@@ -353,6 +356,7 @@ class AuthProvider extends ChangeNotifier {
 
         // Autentikasi ke Firebase menggunakan Custom Token
         await FirebaseAuth.instance.signInWithCustomToken(customToken);
+        await NotificationService.saveDeviceToken();
 
         if (context.mounted) {
           Navigator.pop(context); // Tutup loading dialog

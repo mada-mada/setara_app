@@ -8,6 +8,7 @@ import '../../../shared/navigation/app_page_transition.dart';
 import '../../../shared/widgets/setara_end_drawer.dart';
 import '../providers/admin_dashboard_provider.dart';
 import 'menu_item_form_page.dart';
+import 'admin_orders_page.dart';
 
 class CafeManagerDashboard extends StatefulWidget {
   final String cafeName;
@@ -247,6 +248,31 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
               ),
             ),
 
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFDE68A),
+                    foregroundColor: const Color(0xFF15130D),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  icon: const Icon(Icons.receipt_long_rounded),
+                  label: Text("Lihat Daftar Pesanan", style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 16)),
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    Navigator.push(
+                      context,
+                      buildAppPageRoute(AdminOrdersPage(placeId: widget.placeId)),
+                    );
+                  },
+                ),
+              ),
+            ),
+            
             const SizedBox(height: 24),
 
             // Quick Toggle Controls (Accessibility Features)
