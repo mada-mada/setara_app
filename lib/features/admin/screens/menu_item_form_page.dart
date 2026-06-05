@@ -48,7 +48,8 @@ class _MenuItemFormPageState extends State<MenuItemFormPage> {
     _categoryController = TextEditingController(
       text: initialItem?["category_name"]?.toString() ?? "",
     );
-    _existingImageUrl = initialItem?["image_url"]?.toString() ?? initialItem?["imageUrl"]?.toString();
+    final String? rawImg = initialItem?["image_url"]?.toString() ?? initialItem?["imageUrl"]?.toString();
+    _existingImageUrl = rawImg?.replaceAll(RegExp(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'), '192.168.0.16');
     _isAvailable = (initialItem?["is_available"] == true || initialItem?["is_available"] == 1);
   }
 

@@ -30,8 +30,8 @@ class _SuperAdminFormPageState extends State<SuperAdminFormPage> {
     final admin = widget.initialAdmin;
     _nameController = TextEditingController(text: admin?["name"] ?? "");
     _emailController = TextEditingController(text: admin?["email"] ?? "");
-    _passwordController = TextEditingController(text: admin?["password"] ?? "");
-    _cafeNameController = TextEditingController(text: admin?["cafeName"] ?? "");
+    _passwordController = TextEditingController(text: "");
+    _cafeNameController = TextEditingController(text: admin?["cafe_name"] ?? admin?["cafeName"] ?? "");
   }
 
   @override
@@ -50,51 +50,53 @@ class _SuperAdminFormPageState extends State<SuperAdminFormPage> {
 
     HapticFeedback.mediumImpact();
 
-    if (_isEditing) {
-      // Return updated data (local mock since backend doesn't support update yet)
-      Navigator.pop(context, {
-        ...?widget.initialAdmin,
-        "name": _nameController.text.trim(),
-        "email": _emailController.text.trim(),
-        "password": _passwordController.text,
-        "cafeName": _cafeNameController.text.trim(),
-      });
-      return;
-    }
-
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final response = await http.post(
-        Uri.parse('http://192.168.0.16:8000/api/users'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'name': _nameController.text.trim(),
-          'email': _emailController.text.trim(),
-          'password': _passwordController.text,
-          'role': 'resto_admin',
-          'cafe_name': _cafeNameController.text.trim(),
-        }),
-      );
+      final url = _isEditing
+          ? 'http://192.168.0.16:8000/api/users/${widget.initialAdmin!["uid"]}'
+          : 'http://192.168.0.16:8000/api/users';
 
-      if (response.statusCode == 201) {
+      final bodyData = {
+        'name': _nameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'role': 'resto_admin',
+        'cafe_name': _cafeNameController.text.trim(),
+      };
+      if (_passwordController.text.isNotEmpty) {
+        bodyData['password'] = _passwordController.text;
+      }
+
+      final response = await (_isEditing
+          ? http.put(
+              Uri.parse(url),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode(bodyData),
+            )
+          : http.post(
+              Uri.parse(url),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode(bodyData),
+            ));
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         if (mounted) {
-          Navigator.pop(context, true); // Indicate success for new addition
+          Navigator.pop(context, true); // Indicate success for reload
         }
       } else {
         final body = jsonDecode(response.body);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(body['message'] ?? 'Gagal membuat admin')),
+            SnackBar(content: Text(body['message'] ?? 'Gagal memproses admin')),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Terjadi kesalahan jaringan')),
+          SnackBar(content: Text('Terjadi kesalahan jaringan: $e')),
         );
       }
     } finally {
@@ -203,11 +205,17 @@ class _SuperAdminFormPageState extends State<SuperAdminFormPage> {
                     },
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Password Admin wajib diisi";
-                    }
-                    if (value.length < 8) {
-                      return "Password minimal 8 karakter";
+                    if (!_isEditing) {
+                      if (value == null || value.isEmpty) {
+                        return "Password Admin wajib diisi";
+                      }
+                      if (value.length < 8) {
+                        return "Password minimal 8 karakter";
+                      }
+                    } else {
+                      if (value != null && value.isNotEmpty && value.length < 8) {
+                        return "Password minimal 8 karakter";
+                      }
                     }
                     return null;
                   },

@@ -91,6 +91,56 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
     HapticFeedback.mediumImpact();
     final item = _menuItems[itemIndex];
     
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF221F19),
+        title: Text(
+          "Hapus Menu?",
+          style: GoogleFonts.plusJakartaSans(
+            color: const Color(0xFFE8E2D8),
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          "Apakah Anda yakin ingin menghapus '${item["name"]}' dari daftar menu?",
+          style: GoogleFonts.lexend(
+            color: const Color(0xFFCDC6B3),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              "Batal",
+              style: GoogleFonts.lexend(
+                color: const Color(0xFFCDC6B3),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              "Hapus",
+              style: GoogleFonts.lexend(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
     try {
       final url = Uri.parse('http://192.168.0.16:8000/api/places/${widget.placeId}/menus/${item["id"]}');
       final response = await http.delete(url);
@@ -448,7 +498,8 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
   Widget _buildMenuCard(Map<String, dynamic> item, int itemIndex) {
     final bool isAvailable = item["is_available"] == true || item["is_available"] == 1;
     final Color placeholderBg = const Color(0xFF3E2723); // Default placeholder color
-    final String? imageUrl = item["image_url"];
+    final String? _rawImageUrl = item["image_url"]?.toString();
+    final String? imageUrl = _rawImageUrl?.replaceAll(RegExp(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'), '192.168.0.16');
     final String priceStr = item["price"] != null ? "Rp ${item["price"]}" : "Rp 0";
 
     return Container(

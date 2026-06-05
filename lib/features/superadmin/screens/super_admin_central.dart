@@ -101,7 +101,6 @@ class _SuperAdminCentralPageState extends State<SuperAdminCentralPage> {
     }
 
     if (result is bool && result == true) {
-      // New admin added
       await _fetchAdmins();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -110,10 +109,15 @@ class _SuperAdminCentralPageState extends State<SuperAdminCentralPage> {
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(color: Color(0xFFFDE68A), width: 1.5),
+              side: BorderSide(
+                color: isEditing ? const Color(0xFF8BD6B4) : const Color(0xFFFDE68A),
+                width: 1.5,
+              ),
             ),
             content: Text(
-              "Admin berhasil ditambahkan",
+              isEditing
+                  ? "Admin berhasil diperbarui"
+                  : "Admin berhasil ditambahkan",
               style: GoogleFonts.lexend(
                 color: const Color(0xFFE8E2D8),
                 fontWeight: FontWeight.w600,
@@ -122,67 +126,118 @@ class _SuperAdminCentralPageState extends State<SuperAdminCentralPage> {
           ),
         );
       }
-    } else if (result is Map<String, dynamic>) {
-      // Edit locally
-      setState(() {
-        if (isEditing) {
-          _admins[editIndex!] = result;
-        }
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: const Color(0xFF221F19),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFF8BD6B4), width: 1.5),
-          ),
-          content: Text(
-            "Data admin ${result["name"]} berhasil diperbarui",
-            style: GoogleFonts.lexend(
-              color: const Color(0xFFE8E2D8),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      );
     }
   }
 
-  void _deleteAdmin(int index) {
+  Future<void> _deleteAdmin(int index) async {
     HapticFeedback.mediumImpact();
-    final deleted = _admins[index];
-    setState(() {
-      _admins.removeAt(index);
-    });
+    final admin = _admins[index];
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF221F19),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFFFA726), width: 1.5),
-        ),
-        content: Text(
-          "Admin ${deleted["name"]} telah dihapus",
-          style: GoogleFonts.lexend(
+        title: Text(
+          "Hapus Admin?",
+          style: GoogleFonts.plusJakartaSans(
             color: const Color(0xFFE8E2D8),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
-        action: SnackBarAction(
-          label: "BATAL",
-          textColor: const Color(0xFFFDE68A),
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            setState(() {
-              _admins.insert(index, deleted);
-            });
-          },
+        content: Text(
+          "Apakah Anda yakin ingin menghapus '${admin["name"]}'? Tindakan ini akan menghapus akun beserta cafe-nya secara permanen.",
+          style: GoogleFonts.lexend(
+            color: const Color(0xFFCDC6B3),
+          ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              "Batal",
+              style: GoogleFonts.lexend(
+                color: const Color(0xFFCDC6B3),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              "Hapus",
+              style: GoogleFonts.lexend(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
+
+    if (confirm != true) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await http.delete(
+        Uri.parse('http://192.168.0.16:8000/api/users/${admin["uid"]}'),
+      );
+
+      if (response.statusCode == 200) {
+        await _fetchAdmins();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: const Color(0xFF221F19),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: Color(0xFF8BD6B4), width: 1.5),
+              ),
+              content: Text(
+                "Admin ${admin["name"]} berhasil dihapus",
+                style: GoogleFonts.lexend(
+                  color: const Color(0xFFE8E2D8),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          );
+        }
+      } else {
+        final body = jsonDecode(response.body);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(body['message'] ?? 'Gagal menghapus admin'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Terjadi kesalahan jaringan: $e'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override

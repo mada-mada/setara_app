@@ -145,7 +145,8 @@ class _DetailMenuPageState extends State<DetailMenuPage> {
           ),
           const SizedBox(height: 24),
           ...filteredMenus.map((menu) {
-            final String? imageUrl = menu["image_url"]?.toString();
+            final String? _rawImageUrl = menu["image_url"]?.toString();
+            final String? imageUrl = _rawImageUrl?.replaceAll(RegExp(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'), '192.168.0.16');
             final bool hasImage = imageUrl != null && imageUrl.isNotEmpty;
 
             return Padding(
