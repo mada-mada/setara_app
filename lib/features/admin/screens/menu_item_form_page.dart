@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -10,11 +9,7 @@ class MenuItemFormPage extends StatefulWidget {
   final String placeId;
   final Map<String, dynamic>? initialItem;
 
-  const MenuItemFormPage({
-    super.key,
-    required this.placeId,
-    this.initialItem,
-  });
+  const MenuItemFormPage({super.key, required this.placeId, this.initialItem});
 
   @override
   State<MenuItemFormPage> createState() => _MenuItemFormPageState();
@@ -48,9 +43,16 @@ class _MenuItemFormPageState extends State<MenuItemFormPage> {
     _categoryController = TextEditingController(
       text: initialItem?["category_name"]?.toString() ?? "",
     );
-    final String? rawImg = initialItem?["image_url"]?.toString() ?? initialItem?["imageUrl"]?.toString();
-    _existingImageUrl = rawImg?.replaceAll(RegExp(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'), '192.168.0.16');
-    _isAvailable = (initialItem?["is_available"] == true || initialItem?["is_available"] == 1);
+    final String? rawImg =
+        initialItem?["image_url"]?.toString() ??
+        initialItem?["imageUrl"]?.toString();
+    _existingImageUrl = rawImg?.replaceAll(
+      RegExp(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'),
+      '192.168.0.16',
+    );
+    _isAvailable =
+        (initialItem?["is_available"] == true ||
+        initialItem?["is_available"] == 1);
   }
 
   @override
@@ -104,10 +106,7 @@ class _MenuItemFormPageState extends State<MenuItemFormPage> {
 
       if (_selectedImage != null) {
         request.files.add(
-          await http.MultipartFile.fromPath(
-            'image',
-            _selectedImage!.path,
-          ),
+          await http.MultipartFile.fromPath('image', _selectedImage!.path),
         );
       }
 
@@ -287,10 +286,7 @@ class _MenuItemFormPageState extends State<MenuItemFormPage> {
   }) {
     return TextFormField(
       controller: controller,
-      style: GoogleFonts.lexend(
-        color: const Color(0xFFE8E2D8),
-        fontSize: 15,
-      ),
+      style: GoogleFonts.lexend(color: const Color(0xFFE8E2D8), fontSize: 15),
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: const Color(0xFFFDE68A)),
         labelText: label,
@@ -335,7 +331,10 @@ class _MenuItemFormPageState extends State<MenuItemFormPage> {
 
   Future<void> _pickImage() async {
     try {
-      final pickedFile = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+      final pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 70,
+      );
       if (pickedFile != null) {
         setState(() {
           _selectedImage = pickedFile;
@@ -347,7 +346,8 @@ class _MenuItemFormPageState extends State<MenuItemFormPage> {
   }
 
   Widget _buildImageUploadField() {
-    final hasExistingImage = _existingImageUrl != null && _existingImageUrl!.isNotEmpty;
+    final hasExistingImage =
+        _existingImageUrl != null && _existingImageUrl!.isNotEmpty;
     final hasNewImage = _selectedImage != null;
     final hasAnyImage = hasExistingImage || hasNewImage;
 
@@ -373,16 +373,16 @@ class _MenuItemFormPageState extends State<MenuItemFormPage> {
                   decoration: const BoxDecoration(color: Color(0xFF2C2A23)),
                   child: hasAnyImage
                       ? (hasNewImage
-                          ? Image.file(
-                              File(_selectedImage!.path),
-                              fit: BoxFit.cover,
-                            )
-                          : Image.network(
-                              _existingImageUrl!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  _buildImagePlaceholder(),
-                            ))
+                            ? Image.file(
+                                File(_selectedImage!.path),
+                                fit: BoxFit.cover,
+                              )
+                            : Image.network(
+                                _existingImageUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _buildImagePlaceholder(),
+                              ))
                       : _buildImagePlaceholder(),
                 ),
               ),
@@ -406,7 +406,7 @@ class _MenuItemFormPageState extends State<MenuItemFormPage> {
                   ),
                 ),
               ),
-            ]
+            ],
           ],
         ),
       ),
