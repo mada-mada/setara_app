@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'auth_page_route.dart';
 import 'signup.dart';
 import 'forgot_password.dart';
-import '../user/screens/main_wrapper.dart';
-import '../../shared/navigation/app_page_transition.dart';
+import 'providers/auth_provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class LoginPage extends StatefulWidget {
@@ -50,55 +50,20 @@ class _LoginPageState extends State<LoginPage>
     super.dispose();
   }
 
+  Future<void> _handleGoogleAuth() async {
+    await Provider.of<AuthProvider>(
+      context,
+      listen: false,
+    ).handleGoogleAuth(context, isSignUp: false);
+  }
+
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
-      HapticFeedback.mediumImpact();
-
-      // Tampilkan loading dialog atau animasi sukses yang premium
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => Center(
-          child: Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: const Color(0xFF221F19),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: const Color(0xFFFDE68A), width: 2),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFDE68A)),
-                  strokeWidth: 4,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  "Masuk...",
-                  style: GoogleFonts.lexend(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFFE8E2D8),
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      Provider.of<AuthProvider>(context, listen: false).handleLogin(
+        context,
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
       );
-
-      // Simulasi delay login
-      Future.delayed(const Duration(seconds: 1500), () {
-        if (mounted) {
-          Navigator.pop(context); // Tutup dialog
-          Navigator.pushReplacement(
-            context,
-            buildAppPageRoute(const MainWrapper()),
-          );
-        }
-      });
     }
   }
 
@@ -472,12 +437,8 @@ class _LoginPageState extends State<LoginPage>
                         child: InkWell(
                           borderRadius: BorderRadius.circular(9999),
                           onTap: () {
-                            HapticFeedback.mediumImpact();
-                            // Simulasi sukses masuk lewat Google
-                            Navigator.pushReplacement(
-                              context,
-                              buildAppPageRoute(const MainWrapper()),
-                            );
+                            HapticFeedback.lightImpact();
+                            _handleGoogleAuth();
                           },
                           child: Container(
                             height: 60,

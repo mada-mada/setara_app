@@ -1,116 +1,198 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import '../../../shared/navigation/app_page_transition.dart';
+import '../../../shared/widgets/setara_end_drawer.dart';
+import '../providers/admin_dashboard_provider.dart';
 import 'menu_item_form_page.dart';
+import 'admin_orders_page.dart';
 
 class CafeManagerDashboard extends StatefulWidget {
-  const CafeManagerDashboard({super.key});
+  final String cafeName;
+  final String placeId;
+
+  const CafeManagerDashboard({
+    super.key,
+    required this.cafeName,
+    required this.placeId,
+  });
 
   @override
   State<CafeManagerDashboard> createState() => _CafeManagerDashboardState();
 }
 
 class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
-  // Mock data for Cafe Menu Items
-  final List<Map<String, dynamic>> _menuItems = [
-    {
-      "name": "Ethos Specialty Cold Brew",
-      "price": "Rp 38.000",
-      "category": "Kopi Dingin",
-      "isAvailable": true,
-      "imagePlaceholderColor": const Color(0xFF3E2723), // Dark Brown
-      "imageUrl": null, // Ready for dynamic image URL
-    },
-    {
-      "name": "Inclusion Caramel Latte",
-      "price": "Rp 42.000",
-      "category": "Kopi Susu",
-      "isAvailable": true,
-      "imagePlaceholderColor": const Color(0xFF4E342E), // Brown
-      "imageUrl": null,
-    },
-    {
-      "name": "Symmetrical Portal Croissant",
-      "price": "Rp 28.000",
-      "category": "Pastry",
-      "isAvailable": false,
-      "imagePlaceholderColor": const Color(0xFFD84315), // Deep Orange/Pastry
-      "imageUrl": null,
-    },
-    {
-      "name": "Inclusive Golden Chamomile",
-      "price": "Rp 32.000",
-      "category": "Teh Herbal",
-      "isAvailable": true,
-      "imagePlaceholderColor": const Color(0xFFE65100), // Orange
-      "imageUrl": null,
-    },
-    {
-      "name": "Setara Premium Avocado Toast",
-      "price": "Rp 48.000",
-      "category": "Makanan Berat",
-      "isAvailable": true,
-      "imagePlaceholderColor": const Color(0xFF1B5E20), // Green
-      "imageUrl": null,
-    },
-  ];
-
+  List<Map<String, dynamic>> _menuItems = [];
+  bool _isLoading = true;
   bool _isAudioAssistEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchMenus();
+  }
+
+  Future<void> _fetchMenus() async {
+    try {
+      final url = Uri.parse('http://192.168.0.16:8000/api/places/${widget.placeId}/menus');
+      final response = await http.get(url);
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'Sukses' && data['data'] != null) {
+          setState(() {
+            _menuItems = List<Map<String, dynamic>>.from(data['data']);
+            _isLoading = false;
+          });
+          return;
+        }
+      }
+      throw Exception("Gagal memuat data menu");
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.redAccent,
+            content: Text(
+              "Error: $e",
+              style: GoogleFonts.lexend(color: Colors.white),
+            ),
+          ),
+        );
+      }
+    }
+  }
 
   Future<void> _openItemForm({int? itemIndex}) async {
     HapticFeedback.mediumImpact();
     final isEditing = itemIndex != null;
     final editIndex = itemIndex;
-    final result = await Navigator.push<Map<String, dynamic>>(
+    final result = await Navigator.push<bool>(
       context,
       buildAppPageRoute(
         MenuItemFormPage(
+          placeId: widget.placeId,
           initialItem: isEditing ? _menuItems[editIndex!] : null,
         ),
       ),
     );
 
-    if (result == null || !mounted) {
-      return;
+    if (result == true && mounted) {
+      setState(() => _isLoading = true);
+      _fetchMenus();
     }
-
-    setState(() {
-      if (isEditing) {
-        _menuItems[editIndex!] = result;
-      } else {
-        _menuItems.add(result);
-      }
-    });
   }
 
-  void _deleteMenuItem(int itemIndex) {
+  Future<void> _deleteMenuItem(int itemIndex) async {
     HapticFeedback.mediumImpact();
-    final removedItem = _menuItems[itemIndex];
-    setState(() {
-      _menuItems.removeAt(itemIndex);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+    final item = _menuItems[itemIndex];
+    
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF221F19),
-        behavior: SnackBarBehavior.floating,
-        content: Text(
-          "${removedItem["name"]} dihapus",
-          style: GoogleFonts.lexend(
+        title: Text(
+          "Hapus Menu?",
+          style: GoogleFonts.plusJakartaSans(
             color: const Color(0xFFE8E2D8),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
+        content: Text(
+          "Apakah Anda yakin ingin menghapus '${item["name"]}' dari daftar menu?",
+          style: GoogleFonts.lexend(
+            color: const Color(0xFFCDC6B3),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              "Batal",
+              style: GoogleFonts.lexend(
+                color: const Color(0xFFCDC6B3),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              "Hapus",
+              style: GoogleFonts.lexend(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
+
+    if (confirm != true) return;
+
+    try {
+      final url = Uri.parse('http://192.168.0.16:8000/api/places/${widget.placeId}/menus/${item["id"]}');
+      final response = await http.delete(url);
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _menuItems.removeAt(itemIndex);
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: const Color(0xFF221F19),
+              behavior: SnackBarBehavior.floating,
+              content: Text(
+                "${item["name"]} dihapus",
+                style: GoogleFonts.lexend(
+                  color: const Color(0xFFE8E2D8),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          );
+        }
+      } else {
+        throw Exception("Gagal menghapus menu");
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.redAccent,
+            content: Text(
+              "Error: $e",
+              style: GoogleFonts.lexend(color: Colors.white),
+            ),
+          ),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF15130D),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
+    return ChangeNotifierProvider(
+      create: (_) => AdminDashboardProvider(),
+      child: Builder(
+        builder: (providerContext) => Scaffold(
+          key: providerContext.read<AdminDashboardProvider>().scaffoldKey,
+          backgroundColor: const Color(0xFF15130D),
+          endDrawer: const SetaraEndDrawer(),
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
@@ -134,11 +216,12 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
         actions: [
           IconButton(
             icon: const Icon(
-              Icons.notifications_outlined,
+              Icons.menu_open_rounded,
               color: Color(0xFFE8E2D8),
             ),
             onPressed: () {
               HapticFeedback.lightImpact();
+              providerContext.read<AdminDashboardProvider>().openEndDrawer();
             },
           ),
           const SizedBox(width: 8),
@@ -155,7 +238,7 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Ethos Coffee Lab",
+                    widget.cafeName.isNotEmpty ? widget.cafeName : "Kafe Saya",
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 28,
                       fontWeight: FontWeight.w800,
@@ -215,6 +298,31 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
               ),
             ),
 
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFDE68A),
+                    foregroundColor: const Color(0xFF15130D),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  icon: const Icon(Icons.receipt_long_rounded),
+                  label: Text("Lihat Daftar Pesanan", style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 16)),
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    Navigator.push(
+                      context,
+                      buildAppPageRoute(AdminOrdersPage(placeId: widget.placeId)),
+                    );
+                  },
+                ),
+              ),
+            ),
+            
             const SizedBox(height: 24),
 
             // Quick Toggle Controls (Accessibility Features)
@@ -304,20 +412,37 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
 
             // Dynamic ListView.builder for Menu Items
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                itemCount: _menuItems.length,
-                physics: const BouncingScrollPhysics(),
-                itemBuilder: (context, index) {
-                  final item = _menuItems[index];
-                  return _buildMenuCard(item, index);
-                },
-              ),
+              child: _isLoading 
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xFFFDE68A),
+                    ),
+                  )
+                : _menuItems.isEmpty 
+                  ? Center(
+                      child: Text(
+                        "Belum ada menu yang ditambahkan",
+                        style: GoogleFonts.lexend(
+                          color: const Color(0xFFCDC6B3).withValues(alpha: 0.6),
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      itemCount: _menuItems.length,
+                      physics: const BouncingScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        final item = _menuItems[index];
+                        return _buildMenuCard(item, index);
+                      },
+                    ),
             ),
           ],
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 
   Widget _buildStatCard({
@@ -371,9 +496,11 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
   }
 
   Widget _buildMenuCard(Map<String, dynamic> item, int itemIndex) {
-    final bool isAvailable = item["isAvailable"];
-    final Color placeholderBg = item["imagePlaceholderColor"];
-    final String? imageUrl = item["imageUrl"];
+    final bool isAvailable = item["is_available"] == true || item["is_available"] == 1;
+    final Color placeholderBg = const Color(0xFF3E2723); // Default placeholder color
+    final String? _rawImageUrl = item["image_url"]?.toString();
+    final String? imageUrl = _rawImageUrl?.replaceAll(RegExp(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'), '192.168.0.16');
+    final String priceStr = item["price"] != null ? "Rp ${item["price"]}" : "Rp 0";
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -487,7 +614,7 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    item["category"],
+                    item["category_name"] ?? "Kategori",
                     style: GoogleFonts.lexend(
                       fontSize: 12,
                       color: const Color(0xFFCDC6B3).withValues(alpha: 0.6),
@@ -495,7 +622,7 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    item["price"],
+                    priceStr,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,

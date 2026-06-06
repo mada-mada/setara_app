@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:setara_app/shared/widgets/setara_end_drawer.dart';
 import '../../../shared/widgets/setara_sliver_app_bar.dart';
-import '../../../shared/navigation/assist_page_transition.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:setara_app/shared/navigation/app_page_transition.dart';
 import 'detail_menu_page.dart';
 
 class MenuPage extends StatefulWidget {
@@ -12,38 +15,39 @@ class MenuPage extends StatefulWidget {
 }
 
 class _MenuPageState extends State<MenuPage> {
-  // Data tempat inklusif
-  final List<Map<String, dynamic>> places = [
-    {
-      "name": "Ethos Coffee Lab",
-      "desc":
-          "Accessible modern roastery specializing in ethical sourcing and supportive environments for all.",
-      "route": true,
-    },
-    {
-      "name": "Kopi Senyawa",
-      "desc":
-          "Kafe dengan sistem menu audio dan jalur aksesibilitas kursi roda yang luas.",
-      "route": false,
-    },
-    {
-      "name": "Resto Bhinneka",
-      "desc":
-          "Restoran mewah yang menyediakan pelayan terlatih bahasa isyarat dan menu visual tinggi kontras.",
-      "route": false,
-    },
-    {
-      "name": "Ruang Tenang",
-      "desc":
-          "Perpustakaan dan area belajar dengan dukungan teknologi haptik untuk tunanetra.",
-      "route": false,
-    },
-  ];
+  List<Map<String, dynamic>> places = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPlaces();
+  }
+
+  Future<void> _fetchPlaces() async {
+    try {
+      final response = await http.get(Uri.parse('http://192.168.0.16:8000/api/places'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        if (mounted) {
+          setState(() {
+            places = List<Map<String, dynamic>>.from(data);
+            isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) setState(() => isLoading = false);
+      }
+    } catch (e) {
+      if (mounted) setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF15130D),
+      endDrawer: const SetaraEndDrawer(),
       body: CustomScrollView(
         slivers: [
           const SetaraSliverAppBar(),
@@ -63,21 +67,38 @@ class _MenuPageState extends State<MenuPage> {
               ),
             ),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final place = places[index];
+          if (isLoading)
+            const SliverFillRemaining(
+              child: Center(
+                child: CircularProgressIndicator(color: Color(0xFFFDE68A)),
+              ),
+            )
+          else if (places.isEmpty)
+            SliverFillRemaining(
+              child: Center(
+                child: Text(
+                  "Belum ada tempat inklusif.",
+                  style: GoogleFonts.lexend(
+                    color: const Color(0xFFCDC6B3).withValues(alpha: 0.6),
+                  ),
+                ),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final place = places[index];
+                  // (rest of the builder code remains the same because we only matched the beginning)
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 24.0),
                   child: InkWell(
                     onTap: () {
-                      if (place["route"] == true) {
-                        Navigator.push(
-                          context,
-                          buildAssistPageRoute(const EthosCoffeeLabPage()),
-                        );
-                      }
+                      Navigator.push(
+                        context,
+                        buildAppPageRoute(DetailMenuPage(placeData: place)),
+                      );
                     },
                     borderRadius: BorderRadius.circular(16),
                     child: Container(
@@ -95,7 +116,7 @@ class _MenuPageState extends State<MenuPage> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  place["name"],
+                                  place["name"] ?? "Nama Tempat",
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w700,
@@ -115,7 +136,7 @@ class _MenuPageState extends State<MenuPage> {
                             ],
                           ),
                           Text(
-                            place["desc"],
+                            place["description"] ?? "Tidak ada deskripsi",
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.lexend(

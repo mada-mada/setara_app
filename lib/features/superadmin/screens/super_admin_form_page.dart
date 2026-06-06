@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class SuperAdminFormPage extends StatefulWidget {
   const SuperAdminFormPage({super.key, this.initialAdmin});
@@ -18,6 +20,7 @@ class _SuperAdminFormPageState extends State<SuperAdminFormPage> {
   late final TextEditingController _passwordController;
   late final TextEditingController _cafeNameController;
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   bool get _isEditing => widget.initialAdmin != null;
 
@@ -27,8 +30,8 @@ class _SuperAdminFormPageState extends State<SuperAdminFormPage> {
     final admin = widget.initialAdmin;
     _nameController = TextEditingController(text: admin?["name"] ?? "");
     _emailController = TextEditingController(text: admin?["email"] ?? "");
-    _passwordController = TextEditingController(text: admin?["password"] ?? "");
-    _cafeNameController = TextEditingController(text: admin?["cafeName"] ?? "");
+    _passwordController = TextEditingController(text: "");
+    _cafeNameController = TextEditingController(text: admin?["cafe_name"] ?? admin?["cafeName"] ?? "");
   }
 
   @override
@@ -40,22 +43,69 @@ class _SuperAdminFormPageState extends State<SuperAdminFormPage> {
     super.dispose();
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
     HapticFeedback.mediumImpact();
-    Navigator.pop(context, {
-      ...?widget.initialAdmin,
-      "name": _nameController.text.trim(),
-      "email": _emailController.text.trim(),
-      "password": _passwordController.text,
-      "cafeName": _cafeNameController.text.trim(),
-      "avatarColor":
-          widget.initialAdmin?["avatarColor"] ?? const Color(0xFFE65100),
-      "imageUrl": widget.initialAdmin?["imageUrl"],
+
+    setState(() {
+      _isLoading = true;
     });
+
+    try {
+      final url = _isEditing
+          ? 'http://192.168.0.16:8000/api/users/${widget.initialAdmin!["uid"]}'
+          : 'http://192.168.0.16:8000/api/users';
+
+      final bodyData = {
+        'name': _nameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'role': 'resto_admin',
+        'cafe_name': _cafeNameController.text.trim(),
+      };
+      if (_passwordController.text.isNotEmpty) {
+        bodyData['password'] = _passwordController.text;
+      }
+
+      final response = await (_isEditing
+          ? http.put(
+              Uri.parse(url),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode(bodyData),
+            )
+          : http.post(
+              Uri.parse(url),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode(bodyData),
+            ));
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (mounted) {
+          Navigator.pop(context, true); // Indicate success for reload
+        }
+      } else {
+        final body = jsonDecode(response.body);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(body['message'] ?? 'Gagal memproses admin')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Terjadi kesalahan jaringan: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -155,11 +205,17 @@ class _SuperAdminFormPageState extends State<SuperAdminFormPage> {
                     },
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Password Admin wajib diisi";
-                    }
-                    if (value.length < 8) {
-                      return "Password minimal 8 karakter";
+                    if (!_isEditing) {
+                      if (value == null || value.isEmpty) {
+                        return "Password Admin wajib diisi";
+                      }
+                      if (value.length < 8) {
+                        return "Password minimal 8 karakter";
+                      }
+                    } else {
+                      if (value != null && value.isNotEmpty && value.length < 8) {
+                        return "Password minimal 8 karakter";
+                      }
                     }
                     return null;
                   },
@@ -180,14 +236,23 @@ class _SuperAdminFormPageState extends State<SuperAdminFormPage> {
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                  onPressed: _submitForm,
-                  child: Text(
-                    _isEditing ? "Simpan Perubahan" : "Tambah Admin",
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+                  onPressed: _isLoading ? null : _submitForm,
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF121212),
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          _isEditing ? "Simpan Perubahan" : "Tambah Admin",
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                 ),
               ],
             ),

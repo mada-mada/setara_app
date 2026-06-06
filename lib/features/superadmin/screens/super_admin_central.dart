@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../providers/super_admin_nav_provider.dart';
 import '../../../shared/navigation/app_page_transition.dart';
+import '../../../shared/widgets/setara_end_drawer.dart';
 import 'super_admin_form_page.dart';
 import 'super_admin_restaurants_page.dart';
 
@@ -18,33 +21,45 @@ class _SuperAdminCentralPageState extends State<SuperAdminCentralPage> {
   String _searchQuery = "";
   final TextEditingController _searchController = TextEditingController();
 
-  // Dynamic Admins Data
-  final List<Map<String, dynamic>> _admins = [
-    {
-      "name": "Alex Rivera",
-      "email": "alex.rivera@setara.app",
-      "password": "password123",
-      "cafeName": "Downtown Branch",
-      "avatarColor": const Color(0xFF3E2723), // Dark Brown
-      "imageUrl": null,
-    },
-    {
-      "name": "Jordan Chen",
-      "email": "jordan.chen@setara.app",
-      "password": "password123",
-      "cafeName": "North Sector",
-      "avatarColor": const Color(0xFF1B5E20), // Green
-      "imageUrl": null,
-    },
-    {
-      "name": "Elena Moretti",
-      "email": "elena.moretti@setara.app",
-      "password": "password123",
-      "cafeName": "HQ Branch",
-      "avatarColor": const Color(0xFF0D47A1), // Deep Blue
-      "imageUrl": null,
-    },
-  ];
+  List<Map<String, dynamic>> _admins = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAdmins();
+  }
+
+  Future<void> _fetchAdmins() async {
+    try {
+      final response = await http.get(Uri.parse('http://192.168.0.16:8000/api/users'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        if (mounted) {
+          setState(() {
+            _admins = data
+                .where((user) => user['role'] == 'resto_admin')
+                .map((user) => {
+                      "uid": user["uid"],
+                      "name": user["name"] ?? "Unknown",
+                      "email": user["email"] ?? "",
+                      "password": "", // Hidden
+                      "cafeName": user["cafe_name"] ?? "No Cafe",
+                      "avatarColor": const Color(0xFFE65100),
+                      "imageUrl": null,
+                    })
+                .toList()
+                .cast<Map<String, dynamic>>();
+            _isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -72,7 +87,7 @@ class _SuperAdminCentralPageState extends State<SuperAdminCentralPage> {
     HapticFeedback.mediumImpact();
     final isEditing = adminIndex != null;
     final editIndex = adminIndex;
-    final result = await Navigator.push<Map<String, dynamic>>(
+    final result = await Navigator.push(
       context,
       buildAppPageRoute(
         SuperAdminFormPage(
@@ -85,72 +100,144 @@ class _SuperAdminCentralPageState extends State<SuperAdminCentralPage> {
       return;
     }
 
-    setState(() {
-      if (isEditing) {
-        _admins[editIndex!] = result;
-      } else {
-        _admins.add(result);
+    if (result is bool && result == true) {
+      await _fetchAdmins();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFF221F19),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: isEditing ? const Color(0xFF8BD6B4) : const Color(0xFFFDE68A),
+                width: 1.5,
+              ),
+            ),
+            content: Text(
+              isEditing
+                  ? "Admin berhasil diperbarui"
+                  : "Admin berhasil ditambahkan",
+              style: GoogleFonts.lexend(
+                color: const Color(0xFFE8E2D8),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        );
       }
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: const Color(0xFF221F19),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: isEditing ? const Color(0xFF8BD6B4) : const Color(0xFFFDE68A),
-            width: 1.5,
-          ),
-        ),
-        content: Text(
-          isEditing
-              ? "Data admin ${result["name"]} berhasil diperbarui"
-              : "Admin ${result["name"]} berhasil ditambahkan",
-          style: GoogleFonts.lexend(
-            color: const Color(0xFFE8E2D8),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
+    }
   }
 
-  void _deleteAdmin(int index) {
+  Future<void> _deleteAdmin(int index) async {
     HapticFeedback.mediumImpact();
-    final deleted = _admins[index];
-    setState(() {
-      _admins.removeAt(index);
-    });
+    final admin = _admins[index];
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF221F19),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFFFA726), width: 1.5),
-        ),
-        content: Text(
-          "Admin ${deleted["name"]} telah dihapus",
-          style: GoogleFonts.lexend(
+        title: Text(
+          "Hapus Admin?",
+          style: GoogleFonts.plusJakartaSans(
             color: const Color(0xFFE8E2D8),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
-        action: SnackBarAction(
-          label: "BATAL",
-          textColor: const Color(0xFFFDE68A),
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            setState(() {
-              _admins.insert(index, deleted);
-            });
-          },
+        content: Text(
+          "Apakah Anda yakin ingin menghapus '${admin["name"]}'? Tindakan ini akan menghapus akun beserta cafe-nya secara permanen.",
+          style: GoogleFonts.lexend(
+            color: const Color(0xFFCDC6B3),
+          ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              "Batal",
+              style: GoogleFonts.lexend(
+                color: const Color(0xFFCDC6B3),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              "Hapus",
+              style: GoogleFonts.lexend(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
+
+    if (confirm != true) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await http.delete(
+        Uri.parse('http://192.168.0.16:8000/api/users/${admin["uid"]}'),
+      );
+
+      if (response.statusCode == 200) {
+        await _fetchAdmins();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: const Color(0xFF221F19),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: Color(0xFF8BD6B4), width: 1.5),
+              ),
+              content: Text(
+                "Admin ${admin["name"]} berhasil dihapus",
+                style: GoogleFonts.lexend(
+                  color: const Color(0xFFE8E2D8),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          );
+        }
+      } else {
+        final body = jsonDecode(response.body);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(body['message'] ?? 'Gagal menghapus admin'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Terjadi kesalahan jaringan: $e'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -159,8 +246,10 @@ class _SuperAdminCentralPageState extends State<SuperAdminCentralPage> {
       create: (_) => SuperAdminNavProvider(),
       child: Builder(
         builder: (providerContext) => Scaffold(
+          key: providerContext.read<SuperAdminNavProvider>().scaffoldKey,
           backgroundColor: const Color(0xFF15130D),
-          appBar: _buildAppBar(),
+          appBar: _buildAppBar(providerContext),
+          endDrawer: const SetaraEndDrawer(),
           body: Stack(
             children: [
               // Content Scroll
@@ -178,7 +267,7 @@ class _SuperAdminCentralPageState extends State<SuperAdminCentralPage> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(BuildContext providerContext) {
     return AppBar(
       backgroundColor: const Color(0xFF1D1B15),
       elevation: 0,
@@ -206,12 +295,13 @@ class _SuperAdminCentralPageState extends State<SuperAdminCentralPage> {
       actions: [
         IconButton(
           icon: const Icon(
-            Icons.notifications_outlined,
+            Icons.menu_open_rounded,
             color: Color(0xFFE8E2D8),
             size: 26,
           ),
           onPressed: () {
             HapticFeedback.lightImpact();
+            providerContext.read<SuperAdminNavProvider>().openEndDrawer();
           },
         ),
         const SizedBox(width: 12),
@@ -429,20 +519,28 @@ class _SuperAdminCentralPageState extends State<SuperAdminCentralPage> {
         const SizedBox(height: 16),
 
         // Admin list builders
-        _filteredAdmins.isEmpty
-            ? _buildEmptyState()
-            : ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                itemCount: _filteredAdmins.length,
-                itemBuilder: (context, index) {
-                  final admin = _filteredAdmins[index];
-                  // Find original index in master list
-                  final originalIndex = _admins.indexOf(admin);
-                  return _buildAdminCard(admin, originalIndex);
-                },
-              ),
+        if (_isLoading)
+          const Padding(
+            padding: EdgeInsets.all(32.0),
+            child: Center(
+              child: CircularProgressIndicator(color: Color(0xFFFDE68A)),
+            ),
+          )
+        else if (_filteredAdmins.isEmpty)
+          _buildEmptyState()
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            itemCount: _filteredAdmins.length,
+            itemBuilder: (context, index) {
+              final admin = _filteredAdmins[index];
+              // Find original index in master list
+              final originalIndex = _admins.indexOf(admin);
+              return _buildAdminCard(admin, originalIndex);
+            },
+          ),
       ],
     );
   }

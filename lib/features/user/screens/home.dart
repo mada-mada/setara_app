@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:setara_app/shared/widgets/setara_end_drawer.dart';
 import '../../../shared/providers/bottom_navbar_provider.dart';
 import '../../../shared/widgets/assist_toggle.dart';
 import '../../../shared/widgets/setara_sliver_app_bar.dart';
@@ -12,6 +13,7 @@ class Homepage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF15130D),
+      endDrawer: const SetaraEndDrawer(),
       body: CustomScrollView(
         slivers: [
           const SetaraSliverAppBar(),

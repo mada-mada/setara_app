@@ -1,7 +1,8 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 class SuperAdminNavProvider extends ChangeNotifier {
   int _currentIndex = 0;
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   int get currentIndex => _currentIndex;
 
@@ -11,5 +12,9 @@ class SuperAdminNavProvider extends ChangeNotifier {
     }
     _currentIndex = index;
     notifyListeners();
+  }
+
+  void openEndDrawer() {
+    scaffoldKey.currentState?.openEndDrawer();
   }
 }
