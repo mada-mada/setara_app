@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:setara_app/features/auth/auth_page_route.dart';
 import 'package:setara_app/features/auth/login.dart';
 import 'package:setara_app/features/auth/providers/auth_provider.dart';
+import 'package:setara_app/shared/navigation/app_page_transition.dart';
+import 'package:setara_app/features/user/screens/order_history.dart';
 
 class SetaraEndDrawer extends StatelessWidget {
   const SetaraEndDrawer({super.key});
@@ -102,6 +104,33 @@ class SetaraEndDrawer extends StatelessWidget {
               ),
             ),
             const Divider(color: Color(0xFF4B4738), height: 1),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                leading: const Icon(
+                  Icons.history_rounded,
+                  color: Color(0xFFCDC6B3),
+                ),
+                title: Text(
+                  'Riwayat Pesanan',
+                  style: GoogleFonts.lexend(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFFE8E2D8),
+                  ),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop(); // Close drawer
+                  Navigator.of(context).push(
+                    buildAppPageRoute(const OrderHistoryPage()),
+                  );
+                },
+              ),
+            ),
             const Spacer(),
             Padding(
               padding: const EdgeInsets.all(24),
