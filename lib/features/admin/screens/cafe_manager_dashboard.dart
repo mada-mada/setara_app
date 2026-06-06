@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../../../shared/navigation/app_page_transition.dart';
 import '../../../shared/widgets/setara_end_drawer.dart';
+import '../../../shared/providers/accessibility_provider.dart';
 import '../providers/admin_dashboard_provider.dart';
 import 'menu_item_form_page.dart';
 import 'admin_orders_page.dart';
@@ -27,7 +28,6 @@ class CafeManagerDashboard extends StatefulWidget {
 class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
   List<Map<String, dynamic>> _menuItems = [];
   bool _isLoading = true;
-  bool _isAudioAssistEnabled = true;
 
   @override
   void initState() {
@@ -362,15 +362,17 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
                         ],
                       ),
                     ),
-                    Switch.adaptive(
-                      value: _isAudioAssistEnabled,
-                      activeThumbColor: const Color(0xFF8BD6B4),
-                      activeTrackColor: const Color(0xFF8BD6B4).withValues(alpha: 0.3),
-                      onChanged: (val) {
-                        HapticFeedback.lightImpact();
-                        setState(() {
-                          _isAudioAssistEnabled = val;
-                        });
+                    Consumer<AccessibilityProvider>(
+                      builder: (context, accessibilityProvider, child) {
+                        return Switch.adaptive(
+                          value: accessibilityProvider.isAudioAssistEnabled,
+                          activeThumbColor: const Color(0xFF8BD6B4),
+                          activeTrackColor: const Color(0xFF8BD6B4).withValues(alpha: 0.3),
+                          onChanged: (val) {
+                            HapticFeedback.lightImpact();
+                            accessibilityProvider.toggleAudioAssist(val);
+                          },
+                        );
                       },
                     ),
                   ],

@@ -5,6 +5,7 @@ import 'package:setara_app/features/auth/providers/auth_provider.dart';
 import 'package:setara_app/shared/providers/bottom_navbar_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:setara_app/shared/providers/accessibility_provider.dart';
 
 import 'package:setara_app/services/notification_service.dart';
 
@@ -24,6 +25,7 @@ class Main extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => BottomNavProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => AccessibilityProvider()),
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
