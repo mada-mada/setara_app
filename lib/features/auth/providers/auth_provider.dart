@@ -33,7 +33,7 @@ class AuthProvider extends ChangeNotifier {
         ? const Color(0xFF8BD6B4)
         : const Color(0xFFFDE68A);
 
-    // Tampilkan loading dialog premium
+    
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -72,22 +72,15 @@ class AuthProvider extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      // Inisialisasi Google Sign-In instance dengan serverClientId (wajib di v7+)
       await GoogleSignIn.instance.initialize(
         serverClientId:
             '140173379906-n47i8u9cvfu92ni7jkm87cbfb8aen67m.apps.googleusercontent.com',
       );
-
-      // Mulai proses Google Sign-In bawaan HP
       final googleUser = await GoogleSignIn.instance.authenticate();
-
-      // Dapatkan ID Token dari Google
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final String? idToken = googleAuth.idToken;
 
       if (idToken == null) throw Exception("Gagal mendapatkan token Google.");
-
-      // Kirim Token ke Backend Laravel Anda
       final response = await http.post(
         Uri.parse('$_baseUrl/auth/google-login'),
         body: {'id_token': idToken},
@@ -97,19 +90,19 @@ class AuthProvider extends ChangeNotifier {
         final responseData = jsonDecode(response.body);
         final String customToken = responseData['custom_token'];
 
-        // Autentikasi ke Firebase menggunakan Custom Token dari Laravel
+       
         await FirebaseAuth.instance.signInWithCustomToken(customToken);
         await NotificationService.saveDeviceToken();
 
-        // Sukses! Arahkan ke halaman utama
+       
         if (context.mounted) {
-          Navigator.pop(context); // Tutup loading
+          Navigator.pop(context); 
 
           if (isSignUp) {
-            // Tampilkan notifikasi pendaftaran berhasil
+           
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                backgroundColor: const Color(0xFF005C42), // Green banner
+                backgroundColor: const Color(0xFF005C42), 
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -135,23 +128,23 @@ class AuthProvider extends ChangeNotifier {
       }
     } catch (e) {
       if (context.mounted) {
-        Navigator.pop(context); // Tutup loading
+        Navigator.pop(context); 
 
         debugPrint("====== ERROR LOGIN/SIGNUP GOOGLE ======");
         debugPrint(e.toString());
         debugPrint("=======================================");
 
-        // Periksa apakah error disebabkan oleh pembatalan pengguna
+        
         final errorStr = e.toString().toLowerCase();
         final isCanceled =
             errorStr.contains('canceled') ||
             errorStr.contains('cancelled') ||
             errorStr.contains('sign_in_failed') ||
             errorStr.contains('user-cancelled') ||
-            errorStr.contains('12501'); // Kode standar API Google untuk cancel
+            errorStr.contains('12501'); 
 
         if (!isCanceled) {
-          // Tampilkan error menggunakan SnackBar jika bukan pembatalan
+          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: Colors.redAccent,
@@ -230,16 +223,16 @@ class AuthProvider extends ChangeNotifier {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final String customToken = responseData['custom_token'];
 
-        // Autentikasi ke Firebase menggunakan Custom Token
+      
         await FirebaseAuth.instance.signInWithCustomToken(customToken);
         await NotificationService.saveDeviceToken();
 
         if (context.mounted) {
-          Navigator.pop(context); // Tutup loading dialog
+          Navigator.pop(context); 
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              backgroundColor: const Color(0xFF005C42), // Green banner
+              backgroundColor: const Color(0xFF005C42), 
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -264,7 +257,7 @@ class AuthProvider extends ChangeNotifier {
       }
     } catch (e) {
       if (context.mounted) {
-        Navigator.pop(context); // Tutup loading dialog
+        Navigator.pop(context);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -348,20 +341,20 @@ class AuthProvider extends ChangeNotifier {
         final String cafeName = responseData['user']?['cafe_name'] ?? '';
         final String placeId = responseData['user']?['place_id'] ?? '';
 
-        // Simpan role, cafeName, dan placeId
+      
         _userRole = role;
         _cafeName = cafeName;
         _placeId = placeId;
         notifyListeners();
 
-        // Autentikasi ke Firebase menggunakan Custom Token
+        
         await FirebaseAuth.instance.signInWithCustomToken(customToken);
         await NotificationService.saveDeviceToken();
 
         if (context.mounted) {
-          Navigator.pop(context); // Tutup loading dialog
+          Navigator.pop(context);
 
-          // Routing berbasis role
+          
           switch (role) {
             case 'super_admin':
               Navigator.pushReplacement(
@@ -390,7 +383,7 @@ class AuthProvider extends ChangeNotifier {
       }
     } catch (e) {
       if (context.mounted) {
-        Navigator.pop(context); // Tutup loading dialog
+        Navigator.pop(context); 
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

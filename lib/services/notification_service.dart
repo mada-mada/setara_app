@@ -5,7 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class NotificationService {
-  static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  static final FirebaseMessaging _firebaseMessaging =
+      FirebaseMessaging.instance;
   static final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
@@ -40,7 +41,8 @@ class NotificationService {
 
     await _localNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(channel);
 
     // 4. Save FCM Token
@@ -72,16 +74,18 @@ class NotificationService {
   }
 
   static Future<void> saveDeviceToken() async {
-    String? token = await _firebaseMessaging.getToken();
-    User? currentUser = FirebaseAuth.instance.currentUser;
+    try {
+      String? token = await _firebaseMessaging.getToken();
+      User? currentUser = FirebaseAuth.instance.currentUser;
 
-    if (token != null && currentUser != null) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser.uid)
-          .set({
-        'fcm_token': token,
-      }, SetOptions(merge: true));
+      if (token != null && currentUser != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .set({'fcm_token': token}, SetOptions(merge: true));
+      }
+    } catch (e) {
+      debugPrint("Gagal mendapatkan FCM Token (kemungkinan SERVICE_NOT_AVAILABLE): $e");
     }
   }
 }
