@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:setara_app/features/auth/auth_page_route.dart';
 import 'package:setara_app/features/auth/login.dart';
 import 'package:setara_app/features/auth/providers/auth_provider.dart';
+import 'package:setara_app/features/user/screens/order_history.dart';
 
 class SetaraEndDrawer extends StatelessWidget {
   const SetaraEndDrawer({super.key});
@@ -102,6 +103,40 @@ class SetaraEndDrawer extends StatelessWidget {
               ),
             ),
             const Divider(color: Color(0xFF4B4738), height: 1),
+            Consumer<AuthProvider>(
+              builder: (context, authProvider, _) {
+                if (authProvider.userRole == 'user') {
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      leading: const Icon(Icons.history, color: Color(0xFFFDE68A)),
+                      title: Text(
+                        'Riwayat Pesanan',
+                        style: GoogleFonts.lexend(
+                          color: const Color(0xFFE8E2D8),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      trailing: const Icon(Icons.chevron_right, color: Color(0xFFCDC6B3)),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const OrderHistoryPage(),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
             const Spacer(),
             Padding(
               padding: const EdgeInsets.all(24),
