@@ -8,7 +8,7 @@ class BottomNavProvider extends ChangeNotifier {
   void setIndex(int index) {
     if (_currentIndex != index) {
       _currentIndex = index;
-      notifyListeners(); // Memperbarui UI yang mendengarkan state ini
+      notifyListeners();
     }
   }
 }

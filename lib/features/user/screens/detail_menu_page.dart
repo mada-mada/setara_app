@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:setara_app/features/user/screens/order_history.dart';
 import 'package:setara_app/shared/navigation/app_page_transition.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:setara_app/shared/providers/accessibility_provider.dart';
 
 class DetailMenuPage extends StatefulWidget {
   final Map<String, dynamic> placeData;
@@ -17,6 +20,37 @@ class DetailMenuPage extends StatefulWidget {
 class _DetailMenuPageState extends State<DetailMenuPage> {
   String selectedCategory = 'Semua';
   Map<String, int> cart = {};
+  final FlutterTts flutterTts = FlutterTts();
+
+  @override
+  void initState() {
+    super.initState();
+    _initTts();
+  }
+
+  void _initTts() async {
+    await flutterTts.setLanguage("id-ID");
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setPitch(1.0);
+  }
+
+  Future<void> _speak(String name, String? description, dynamic price) async {
+    String text = "$name. ";
+    if (description != null && description.isNotEmpty) {
+      text += "$description. ";
+    }
+    if (price != null) {
+      text += "Harga Rp $price.";
+    }
+    await flutterTts.speak(text);
+  }
+
+  @override
+  void dispose() {
+    flutterTts.stop();
+    super.dispose();
+  }
 
   List<Map<String, dynamic>> get menus {
     return List<Map<String, dynamic>>.from(widget.placeData['menus'] ?? []);
@@ -245,22 +279,47 @@ class _DetailMenuPageState extends State<DetailMenuPage> {
                           ),
                         ),
                         const SizedBox(width: 24),
-                        Column(
-                          children: [
-                            Container(
-                              width: 56,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF37352E),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: const Icon(
-                                Icons.info_outline,
-                                color: Color(0xFFE8E2D8),
-                                size: 30,
-                              ),
-                            ),
-                              const SizedBox(height: 12),
+                        Consumer<AccessibilityProvider>(
+                          builder: (context, accessibility, _) {
+                            return Column(
+                              children: [
+                                if (accessibility.isAudioAssistEnabled) ...[
+                                  GestureDetector(
+                                    onTap: () => _speak(
+                                      menu["name"] ?? "Nama Menu", 
+                                      menu["description"], 
+                                      menu["price"]
+                                    ),
+                                    child: Container(
+                                      width: 56,
+                                      height: 56,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFFDE68A),
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: const Icon(
+                                        Icons.volume_up_rounded,
+                                        color: Color(0xFF15130D),
+                                        size: 30,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF37352E),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: const Icon(
+                                    Icons.info_outline,
+                                    color: Color(0xFFE8E2D8),
+                                    size: 30,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
                               GestureDetector(
                                 onTap: () {
                                   setState(() {
@@ -283,7 +342,9 @@ class _DetailMenuPageState extends State<DetailMenuPage> {
                                 ),
                               ),
                             ],
-                          ),
+                           );
+                          },
+                         ),
                         ],
                       ),
                       if ((cart[menu['id'] ?? menu['name']] ?? 0) > 0)
