@@ -3,6 +3,9 @@ import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:setara_app/features/user/screens/order_history.dart';
+import 'package:setara_app/shared/navigation/app_page_transition.dart';
+
 class DetailMenuPage extends StatefulWidget {
   final Map<String, dynamic> placeData;
   const DetailMenuPage({super.key, required this.placeData});
@@ -145,8 +148,8 @@ class _DetailMenuPageState extends State<DetailMenuPage> {
           ),
           const SizedBox(height: 24),
           ...filteredMenus.map((menu) {
-            final String? _rawImageUrl = menu["image_url"]?.toString();
-            final String? imageUrl = _rawImageUrl?.replaceAll(RegExp(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'), '192.168.0.16');
+            final String? rawImageUrl = menu["image_url"]?.toString();
+            final String? imageUrl = rawImageUrl?.replaceAll(RegExp(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'), '192.168.0.16');
             final bool hasImage = imageUrl != null && imageUrl.isNotEmpty;
 
             return Padding(
@@ -410,16 +413,33 @@ class _DetailMenuPageState extends State<DetailMenuPage> {
         }),
       );
 
+      if (!mounted) return;
+
       if (res.statusCode == 201) {
         setState(() {
           cart.clear();
           isOrdering = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pesanan berhasil dibuat!')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFF005C42),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            content: Text(
+              'Pesanan berhasil dibuat!',
+              style: GoogleFonts.lexend(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+          ),
+        );
+        Navigator.pushReplacement(
+          context,
+          buildAppPageRoute(const OrderHistoryPage()),
+        );
       } else {
         throw Exception("Gagal membuat pesanan: ${res.body}");
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() => isOrdering = false);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
     }

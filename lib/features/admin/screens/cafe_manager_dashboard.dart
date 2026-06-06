@@ -498,8 +498,8 @@ class _CafeManagerDashboardState extends State<CafeManagerDashboard> {
   Widget _buildMenuCard(Map<String, dynamic> item, int itemIndex) {
     final bool isAvailable = item["is_available"] == true || item["is_available"] == 1;
     final Color placeholderBg = const Color(0xFF3E2723); // Default placeholder color
-    final String? _rawImageUrl = item["image_url"]?.toString();
-    final String? imageUrl = _rawImageUrl?.replaceAll(RegExp(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'), '192.168.0.16');
+    final String? rawImageUrl = item["image_url"]?.toString();
+    final String? imageUrl = rawImageUrl?.replaceAll(RegExp(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'), '192.168.0.16');
     final String priceStr = item["price"] != null ? "Rp ${item["price"]}" : "Rp 0";
 
     return Container(
